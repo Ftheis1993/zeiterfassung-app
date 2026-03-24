@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zeiten-pro-v1';
+const CACHE_NAME = 'zeiten-pro-v2';
 
 // Diese Dateien werden für die Offline-Nutzung gespeichert
 const ASSETS_TO_CACHE = [
