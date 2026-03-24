@@ -1,10 +1,17 @@
-const CACHE_NAME = 'zeiten-pro-v2';
+// WICHTIG: Wir setzen es auf v3, um den alten Cache zu löschen
+const CACHE_NAME = 'zeiten-pro-v3';
 
 // Diese Dateien werden für die Offline-Nutzung gespeichert
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  
+  // ---> HIER WAR DAS PROBLEM: Die Icons müssen gecacht werden! <---
+  './icon-192.png',
+  './icon-512.png',
+  './icon.svg',
+  
   // Die externe PDF-Bibliothek und Schriftart auch cachen, 
   // falls sie offline benötigt werden
   'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
@@ -23,7 +30,7 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// 2. Aktivierung: Alte Caches aufräumen, falls du CACHE_NAME änderst (z.B. auf v2)
+// 2. Aktivierung: Alte Caches aufräumen, falls du CACHE_NAME änderst
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
