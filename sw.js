@@ -1,5 +1,5 @@
 // WICHTIG: Wir setzen es auf v3, um den alten Cache zu löschen
-const CACHE_NAME = 'zeiten-pro-v3';
+const CACHE_NAME = 'zeiten-pro-v4';
 
 // Diese Dateien werden für die Offline-Nutzung gespeichert
 const ASSETS_TO_CACHE = [
