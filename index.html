@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zeiterfassung Pro</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Zeiten">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* =========================================
+           ULTRA MODERN THEME (BENTO & BOTTOM SHEETS)
+           ========================================= */
+        :root {
+            /* Light Theme */
+            --primary: #0ea5e9;       
+            --primary-hover: #0284c7;
+            --primary-light: #e0f2fe;
+            --bg-color: #f1f5f9;      
+            --card-bg: #ffffff;       
+            --text-main: #0f172a;     
+            --text-muted: #64748b;    
+            --border: #e2e8f0;        
+            --danger: #ef4444;
+            --danger-bg: #fee2e2;
+            --success: #10b981;
+            --input-bg: #f8fafc;
+            --pill-bg: #f1f5f9;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --modal-overlay: rgba(15, 23, 42, 0.4);
+            
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-float: 0 10px 25px -5px rgba(14, 165, 233, 0.4);
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-nav: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] {
+            /* Midnight Cyber Theme */
+            --primary: #0ea5e9;       
+            --primary-hover: #38bdf8;
+            --primary-light: rgba(14, 165, 233, 0.15);
+            --bg-color: #020617;      
+            --card-bg: #0f172a;       
+            --text-main: #f8fafc;     
+            --text-muted: #94a3b8;    
+            --border: #1e293b;        
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --success: #10b981;
+            --input-bg: #020617;
+            --pill-bg: #1e293b;
+            --glass-bg: rgba(2, 6, 23, 0.85);
+            --modal-overlay: rgba(0, 0, 0, 0.7);
+
+            --shadow-float: 0 10px 25px -5px rgba(14, 165, 233, 0.3);
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-nav: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            margin: 0; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            transition: background-color 0.4s ease, color 0.4s ease; 
+            padding-bottom: 120px; 
+        }
+
+        /* --- Top Navigation --- */
+        .app-bar {
+            position: sticky; top: 0; z-index: 40;
+            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border); transition: 0.4s;
+        }
+        .app-title { font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px;}
+        .app-title span { color: var(--primary); }
+        .app-actions { display: flex; gap: 12px; }
+        .nav-icon {
+            background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main);
+            width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s; box-shadow: var(--shadow-card);
+        }
+        .nav-icon:active { transform: scale(0.9); }
+        .nav-icon.accent { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+
+        /* --- Bento Dashboard --- */
+        .bento-grid {
+            display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;
+        }
+        .bento-card {
+            background: var(--card-bg); border-radius: var(--radius-xl); padding: 20px;
+            box-shadow: var(--shadow-card); border: 1px solid var(--border);
+            display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;
+        }
+        
+        .bento-label { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .bento-value { font-size: 28px; font-weight: 800; color: var(--text-main); line-height: 1; }
+        .bento-value.highlight { color: var(--primary); }
+        .bento-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500;}
+
+        /* Switcher Buttons */
+        .day-switcher { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+        .day-btn {
+            background: var(--input-bg); border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: var(--text-main); cursor: pointer; transition: 0.2s;
+        }
+        .day-btn:active { transform: scale(0.9); }
+        .day-btn:disabled { opacity: 0.2; }
+        
+        .week-switcher { display: flex; align-items: center; gap: 10px; }
+
+        /* Lock Toggle */
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* Bereitschaft Feld */
+        .bento-input {
+            width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-md); 
+            font-size: 15px; background-color: var(--input-bg); color: var(--text-main); font-family: 'Outfit', sans-serif;
+            font-weight: 500; transition: 0.2s; margin-top: 4px;
+        }
+        .bento-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); background: var(--card-bg); }
+        .bento-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- Entry Cards --- */
+        .entries-header { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center;}
+        
+        .entry-card { 
+            background: var(--card-bg); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; 
+            box-shadow: var(--shadow-card); border: 1px solid var(--border); transition: 0.3s;
+        }
+        .entry-card.locked { opacity: 0.5; pointer-events: none; filter: grayscale(50%); }
+        
+        .input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+        .input-group input {
+            width: 100%; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); 
+            font-size: 16px; background-color: var(--input-bg); color: var(--text-main); font-family: 'Outfit', sans-serif;
+            font-weight: 500; transition: 0.2s;
+        }
+        .input-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); background: var(--card-bg); }
+        
+        .time-row { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
+        .time-row input { flex: 1; text-align: center; font-size: 24px; font-weight: 800; color: var(--primary); padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--input-bg); }
+        .time-row input:focus { outline: none; border-color: var(--primary); background: var(--card-bg); }
+        
+        .btn-delete {
+            background: var(--danger-bg); color: var(--danger); border: none; width: 56px; height: 56px;
+            border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
+        }
+        .btn-delete:active { transform: scale(0.9); }
+
+        /* Modern Pills */
+        .pill-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        .pill-label { cursor: pointer; }
+        .pill-label input { display: none; }
+        .pill-text { 
+            display: inline-block; padding: 10px 16px; background: var(--pill-bg); color: var(--text-muted);
+            border-radius: 12px; font-size: 13px; font-weight: 600; border: 1px solid transparent; transition: 0.2s;
+        }
+        .pill-label input:checked + .pill-text { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+
+        /* --- Floating Action Button (FAB) --- */
+        .fab {
+            position: fixed; bottom: 30px; right: 30px; z-index: 40;
+            width: 64px; height: 64px; border-radius: 20px; background: var(--primary); color: white;
+            border: none; font-size: 32px; display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-float); cursor: pointer; transition: 0.3s;
+        }
+        .fab:hover { transform: translateY(-4px); background: var(--primary-hover); }
+        .fab:active { transform: scale(0.9) translateY(0); }
+        .fab:disabled { display: none; }
+
+        /* --- Bottom Sheets (Modals) --- */
+        .modal {
+            display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: var(--modal-overlay); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+        }
+        .sheet-content {
+            background-color: var(--bg-color); position: absolute; bottom: 0; left: 0; width: 100%;
+            border-radius: 32px 32px 0 0; padding: 30px 24px 40px 24px; box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .sheet-title { font-size: 22px; font-weight: 800; margin: 0; }
+        .btn-close { background: var(--pill-bg); border: none; width: 36px; height: 36px; border-radius: 50%; color: var(--text-main); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        /* Settings Design */
+        .settings-block { background: var(--card-bg); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 16px; border: 1px solid var(--border); }
+        .settings-block label { display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+        .settings-input { width: 100%; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 16px; background: var(--input-bg); color: var(--text-main); font-family: 'Outfit'; font-weight: 600;}
+        .settings-input:focus { outline: none; border-color: var(--primary); }
+        
+        .setting-row { display: flex; justify-content: space-between; align-items: center; }
+        .setting-row span { font-weight: 600; font-size: 16px; }
+        
+        .btn-danger { width: 100%; background: var(--danger-bg); color: var(--danger); padding: 16px; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; font-family: 'Outfit'; margin-top: 10px;}
+
+        /* Overview List */
+        .kw-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .kw-item:active { transform: scale(0.98); }
+        .kw-info strong { display: block; font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+        .kw-info span { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .kw-stats { text-align: right; }
+        .kw-hours { font-size: 20px; font-weight: 800; color: var(--primary); display: block; margin-bottom: 4px; }
+        .status-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-done { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .badge-open { background: var(--danger-bg); color: var(--danger); }
+
+    </style>
+</head>
+<body>
+
+    <nav class="app-bar">
+        <h1 class="app-title">Zeiten<span>.</span></h1>
+        <div class="app-actions">
+            <button class="nav-icon" onclick="openOverview()" title="Berichte">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+            </button>
+            <button class="nav-icon" onclick="openSettings()" title="Einstellungen">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </button>
+            <button class="nav-icon accent" onclick="generatePDF()" title="PDF Export">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        
+        <div class="bento-grid">
+            
+            <div class="bento-card">
+                <div class="bento-label">Aktueller Tag</div>
+                <div class="bento-value" id="dayTitleDisplay">Montag, 01.01.</div>
+                <div class="day-switcher">
+                    <span class="bento-sub">Tagessumme: <strong style="color:var(--primary); font-size: 16px;" id="dailyTotal">0.00</strong> h</span>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="day-btn" id="prevDayBtn" onclick="changeDay(-1)">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        <button class="day-btn" id="nextDayBtn" onclick="changeDay(1)">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bento-card">
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <div>
+                        <div class="bento-label">Wochen-Übersicht</div>
+                        <div class="bento-value highlight" id="weekTitleDisplay">KW --</div>
+                        <div class="bento-sub" id="weekDatesDisplay" style="margin-top: 4px;">--.--. - --.--.</div>
+                    </div>
+                    <div class="week-switcher">
+                        <button class="day-btn" onclick="changeWeek(-1)" style="width: 32px; height: 32px;">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        <button class="day-btn" onclick="changeWeek(1)" style="width: 32px; height: 32px;">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--input-bg); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 16px;">
+                    <div>
+                        <div class="bento-label" style="margin-bottom: 4px;">Gesamtstunden</div>
+                        <div class="bento-value" id="totalWeek">0.00</div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                        <span class="bento-sub" style="margin: 0; font-weight: 600;">Abgeschlossen</span>
+                        <label class="switch">
+                            <input type="checkbox" id="chkSubmitted" onchange="toggleSubmitted()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="bento-label">Bereitschaftsdienst</div>
+                    <input type="text" id="in-bereitschaft" class="bento-input" placeholder="z.B. vom 12.10. bis 15.10." oninput="saveBereitschaft()">
+                </div>
+
+            </div>
+            
+        </div>
+
+        <div class="entries-header">
+            Einträge
+        </div>
+
+        <div id="entryList">
+            </div>
+
+    </div>
+
+    <button class="fab" id="addEntryBtn" onclick="addEmptyCard()">
+        <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+    </button>
+
+    <div id="settingsModal" class="modal">
+        <div class="sheet-content">
+            <div class="sheet-header">
+                <h2 class="sheet-title">Einstellungen</h2>
+                <button class="btn-close" onclick="closeSettings()">✕</button>
+            </div>
+            
+            <div class="settings-block">
+                <label>Dein Name für den PDF-Export</label>
+                <input type="text" id="userName" class="settings-input" placeholder="Max Mustermann">
+            </div>
+
+            <div class="settings-block">
+                <label>Darstellung</label>
+                <div class="setting-row">
+                    <span>Midnight Theme (Dark Mode)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-block" style="border-color: var(--danger-bg); margin-top: 30px;">
+                <label style="color: var(--danger);">Gefahrenzone</label>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 0;">Hiermit löschst du alle erfassten Zeiten permanent von diesem Gerät.</p>
+                <button class="btn-danger" onclick="resetAllData()">Alle Daten löschen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="overviewModal" class="modal">
+        <div class="sheet-content">
+            <div class="sheet-header">
+                <h2 class="sheet-title">Berichte</h2>
+                <button class="btn-close" onclick="closeOverview()">✕</button>
+            </div>
+            <div id="overviewList">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        const dayNames = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+        let appState = { mondayDate: null, dayIndex: 0, name: '', entries: {}, submittedWeeks: {}, weeklyBereitschaft: {}, theme: 'dark' };
+
+        // --- Core Date Functions ---
+        function getMonday(d) {
+            let date = new Date(d); date.setHours(0,0,0,0);
+            let day = date.getDay(); let diff = date.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(date.setDate(diff));
+        }
+        function getDateForIndex(index, monday = appState.mondayDate) {
+            let d = new Date(monday); d.setDate(d.getDate() + index); return d;
+        }
+        function getDateString(date) {
+            let yyyy = date.getFullYear();
+            let mm = String(date.getMonth() + 1).padStart(2, '0');
+            let dd = String(date.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+        function formatDateShort(date) {
+            let dd = String(date.getDate()).padStart(2, '0');
+            let mm = String(date.getMonth() + 1).padStart(2, '0');
+            let yyyy = date.getFullYear();
+            return `${dd}.${mm}.${yyyy}`;
+        }
+        function formatDateVeryShort(date) {
+            let dd = String(date.getDate()).padStart(2, '0');
+            let mm = String(date.getMonth() + 1).padStart(2, '0');
+            return `${dd}.${mm}.`;
+        }
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        }
+
+        // --- Initialization ---
+        function initApp() {
+            appState.mondayDate = getMonday(new Date());
+            let today = new Date();
+            appState.dayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1;
+
+            loadFromStorage();
+            applyTheme();
+            renderApp();
+
+            document.getElementById('entryList').addEventListener('input', () => { saveCurrentDay(); updateTotals(); });
+            document.getElementById('entryList').addEventListener('change', () => { saveCurrentDay(); updateTotals(); });
+            document.getElementById('userName').addEventListener('input', (e) => { appState.name = e.target.value; saveToStorage(); });
+            
+            // Close modals when clicking overlay
+            window.onclick = function(event) {
+                if (event.target == document.getElementById('overviewModal')) closeOverview();
+                if (event.target == document.getElementById('settingsModal')) closeSettings();
+            }
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('Service Worker Setup nicht verfügbar', err));
+            }
+        }
+
+        // --- Theming ---
+        function applyTheme() {
+            document.documentElement.setAttribute('data-theme', appState.theme);
+            document.getElementById('themeToggle').checked = (appState.theme === 'dark');
+        }
+        function toggleTheme() {
+            appState.theme = document.getElementById('themeToggle').checked ? 'dark' : 'light';
+            applyTheme(); saveToStorage();
+        }
+
+        // --- UI Rendering ---
+        function renderApp() {
+            let sunday = new Date(appState.mondayDate); sunday.setDate(sunday.getDate() + 6);
+            let mondayStr = getDateString(appState.mondayDate);
+            
+            // Dashboard Updates
+            document.getElementById('weekTitleDisplay').innerText = `KW ${getWeekNumber(appState.mondayDate)}`;
+            document.getElementById('weekDatesDisplay').innerText = `${formatDateVeryShort(appState.mondayDate)} – ${formatDateVeryShort(sunday)}`;
+
+            let isLocked = !!appState.submittedWeeks[mondayStr];
+            document.getElementById('chkSubmitted').checked = isLocked;
+
+            document.getElementById('userName').value = appState.name;
+            document.getElementById('in-bereitschaft').value = appState.weeklyBereitschaft[mondayStr] || '';
+            document.getElementById('in-bereitschaft').disabled = isLocked;
+
+            let currentDate = getDateForIndex(appState.dayIndex);
+            document.getElementById('dayTitleDisplay').innerText = `${dayNames[appState.dayIndex]}, ${formatDateVeryShort(currentDate)}`;
+            
+            document.getElementById('prevDayBtn').disabled = appState.dayIndex === 0;
+            document.getElementById('nextDayBtn').disabled = appState.dayIndex === 6;
+            document.getElementById('addEntryBtn').disabled = isLocked;
+
+            // Generate Cards
+            let dateStr = getDateString(currentDate);
+            let dayData = appState.entries[dateStr] || [];
+            const list = document.getElementById('entryList');
+            list.innerHTML = ''; 
+            
+            if (dayData.length === 0) {
+                addEmptyCard(isLocked); 
+            } else {
+                dayData.forEach(entry => addCardToDOM(entry.baustelle, entry.arbeit, entry.stunden, entry.zusatz, isLocked));
+            }
+            updateTotals();
+        }
+
+        function addEmptyCard(isLocked = false) { addCardToDOM('', '', '', [], isLocked); }
+
+        function addCardToDOM(baustelle, arbeit, stunden, zusatz, isLocked) {
+            const list = document.getElementById('entryList');
+            const card = document.createElement('div');
+            card.className = 'entry-card';
+            if(isLocked) card.classList.add('locked');
+            
+            let zList = Array.isArray(zusatz) ? zusatz : [];
+            const isA = zList.includes('Auslöse') ? 'checked' : '';
+            const isU = zList.includes('Übernachtung') ? 'checked' : '';
+            const isN = zList.includes('Notdienst') ? 'checked' : '';
+            const disabledAttr = isLocked ? 'disabled' : '';
+
+            card.innerHTML = `
+                <div class="input-group">
+                    <input type="text" class="in-baustelle" placeholder="Projekt / Baustelle" value="${baustelle}" ${disabledAttr}>
+                    <input type="text" class="in-arbeit" placeholder="Durchgeführte Tätigkeiten" value="${arbeit}" ${disabledAttr}>
+                </div>
+                
+                <div class="time-row">
+                    <input type="number" step="0.25" class="in-stunden" placeholder="0.00 h" value="${stunden}" ${disabledAttr}>
+                    <button class="btn-delete" onclick="deleteCard(this)" ${disabledAttr}>
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+                
+                <div class="pill-container">
+                    <label class="pill-label"><input type="checkbox" value="Auslöse" class="in-zusatz" ${isA} ${disabledAttr}><span class="pill-text">Auslöse</span></label>
+                    <label class="pill-label"><input type="checkbox" value="Übernachtung" class="in-zusatz" ${isU} ${disabledAttr}><span class="pill-text">Übernachtung</span></label>
+                    <label class="pill-label"><input type="checkbox" value="Notdienst" class="in-zusatz" ${isN} ${disabledAttr}><span class="pill-text">Notdienst</span></label>
+                </div>
+            `;
+            list.appendChild(card);
+        }
+
+        // --- Interaction Logic ---
+        function deleteCard(btn) {
+            btn.closest('.entry-card').remove(); saveCurrentDay(); updateTotals();
+            if(document.getElementById('entryList').children.length === 0) addEmptyCard(!!appState.submittedWeeks[getDateString(appState.mondayDate)]);
+        }
+
+        function saveBereitschaft() {
+            let val = document.getElementById('in-bereitschaft').value;
+            let mondayStr = getDateString(appState.mondayDate);
+            appState.weeklyBereitschaft[mondayStr] = val;
+            saveToStorage();
+        }
+
+        function changeDay(delta) { saveCurrentDay(); appState.dayIndex += delta; renderApp(); }
+        function changeWeek(delta) { saveCurrentDay(); appState.mondayDate.setDate(appState.mondayDate.getDate() + (delta * 7)); appState.dayIndex = 0; renderApp(); }
+
+        function toggleSubmitted() {
+            let checkbox = document.getElementById('chkSubmitted');
+            let mondayStr = getDateString(appState.mondayDate);
+            if (!checkbox.checked) {
+                if (!confirm("Diese Woche entsperren und wieder zur Bearbeitung freigeben?")) {
+                    checkbox.checked = true; return;
+                }
+            }
+            appState.submittedWeeks[mondayStr] = checkbox.checked;
+            saveToStorage(); renderApp(); 
+        }
+
+        // --- Bottom Sheets ---
+        function openSettings() { document.getElementById('settingsModal').style.display = 'block'; }
+        function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+        
+        function openOverview() {
+            saveCurrentDay(); 
+            const overviewList = document.getElementById('overviewList');
+            overviewList.innerHTML = '';
+            let weeksMap = new Map(); 
+            
+            for (const [dateStr, entries] of Object.entries(appState.entries)) {
+                let dateObj = new Date(dateStr); let mondayObj = getMonday(dateObj); let mondayStr = getDateString(mondayObj);
+                if (entries.some(e => e.baustelle.trim() || e.arbeit.trim() || parseFloat(e.stunden) > 0 || (e.zusatz && e.zusatz.length > 0))) {
+                    if (!weeksMap.has(mondayStr)) weeksMap.set(mondayStr, { monday: mondayObj, totalHours: 0, submitted: !!appState.submittedWeeks[mondayStr] });
+                    entries.forEach(e => weeksMap.get(mondayStr).totalHours += parseFloat(e.stunden) || 0);
+                }
+            }
+
+            let weeksArray = Array.from(weeksMap.values()).sort((a, b) => b.monday - a.monday);
+            if (weeksArray.length === 0) {
+                overviewList.innerHTML = '<p style="text-align:center; color: var(--text-muted); font-size: 15px; padding: 20px;">Keine Einträge vorhanden.</p>';
+            } else {
+                weeksArray.forEach(week => {
+                    let kw = getWeekNumber(week.monday);
+                    let statusHtml = week.submitted ? `<span class="status-badge badge-done">Abgeschlossen</span>` : `<span class="status-badge badge-open">Offen</span>`;
+                    let item = document.createElement('div');
+                    item.className = 'kw-item';
+                    item.innerHTML = `
+                        <div class="kw-info"><strong>Kalenderwoche ${kw}</strong><span>${formatDateVeryShort(week.monday)} - ${formatDateVeryShort(new Date(week.monday.getTime() + 6*86400000))}</span></div>
+                        <div class="kw-stats"><span class="kw-hours">${week.totalHours.toFixed(2)} h</span>${statusHtml}</div>`;
+                    item.onclick = () => { appState.mondayDate = new Date(week.monday); appState.dayIndex = 0; renderApp(); closeOverview(); };
+                    overviewList.appendChild(item);
+                });
+            }
+            document.getElementById('overviewModal').style.display = 'block';
+        }
+        function closeOverview() { document.getElementById('overviewModal').style.display = 'none'; }
+
+        // --- Data Management ---
+        function saveCurrentDay() {
+            let dayEntries = [];
+            document.querySelectorAll('.entry-card').forEach(card => {
+                const checkedBoxes = card.querySelectorAll('.in-zusatz:checked');
+                dayEntries.push({ 
+                    baustelle: card.querySelector('.in-baustelle').value, 
+                    arbeit: card.querySelector('.in-arbeit').value, 
+                    stunden: card.querySelector('.in-stunden').value,
+                    zusatz: Array.from(checkedBoxes).map(cb => cb.value)
+                });
+            });
+            appState.entries[getDateString(getDateForIndex(appState.dayIndex))] = dayEntries;
+            saveToStorage();
+        }
+
+        function updateTotals() {
+            let dailyTotal = 0;
+            document.querySelectorAll('.in-stunden').forEach(inp => dailyTotal += parseFloat(inp.value) || 0);
+            document.getElementById('dailyTotal').innerText = dailyTotal.toFixed(2);
+            let weeklyTotal = 0;
+            for (let i = 0; i < 7; i++) {
+                let dStr = getDateString(getDateForIndex(i));
+                if (appState.entries[dStr]) appState.entries[dStr].forEach(e => weeklyTotal += parseFloat(e.stunden) || 0);
+            }
+            document.getElementById('totalWeek').innerText = weeklyTotal.toFixed(2);
+        }
+
+        function saveToStorage() { localStorage.setItem('wochenstunden_pro', JSON.stringify(appState)); }
+        
+        function loadFromStorage() {
+            let saved = localStorage.getItem('wochenstunden_pro') || localStorage.getItem('wochenstunden_mobile'); 
+            if (saved) {
+                let parsed = JSON.parse(saved);
+                appState.name = parsed.name || '';
+                appState.entries = parsed.entries || {};
+                appState.submittedWeeks = parsed.submittedWeeks || {};
+                appState.weeklyBereitschaft = parsed.weeklyBereitschaft || {};
+                appState.theme = parsed.theme || 'dark'; 
+            }
+        }
+
+        function resetAllData() {
+            if (confirm("ACHTUNG: Möchtest du wirklich ALLE deine erfassten Zeiten, Wochen und den Namen unwiderruflich löschen?")) {
+                localStorage.removeItem('wochenstunden_pro');
+                localStorage.removeItem('wochenstunden_mobile');
+                appState.name = ''; appState.entries = {}; appState.submittedWeeks = {}; appState.weeklyBereitschaft = {};
+                appState.mondayDate = getMonday(new Date());
+                appState.dayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+                closeSettings(); renderApp();
+            }
+        }
+
+        // --- MODERNES PDF LAYOUT (BENTO STYLE) ---
+        function generatePDF() {
+            saveCurrentDay();
+            let totalWeekHours = 0, countAusloese = 0, countUebernachtung = 0, countNotdienst = 0;
+            let sunday = getDateForIndex(6);
+            let currentKw = getWeekNumber(appState.mondayDate);
+            let bereitschaftText = appState.weeklyBereitschaft[getDateString(appState.mondayDate)] || '';
+
+            let pdfHtml = `
+                <div style="font-family: 'Outfit', Helvetica, Arial, sans-serif; color: #0f172a; padding: 40px; background: #ffffff; max-width: 800px; margin: 0 auto;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                        <div>
+                            <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -1px;">Wochenbericht.</h1>
+                        </div>
+                        <div style="text-align: right; background: #f1f5f9; padding: 16px 24px; border-radius: 16px;">
+                            <div style="font-size: 24px; font-weight: 800; color: #0ea5e9;">KW ${currentKw}</div>
+                            <div style="color: #64748b; font-size: 14px; font-weight: 500; margin-top: 4px;">${formatDateShort(appState.mondayDate)} – ${formatDateShort(sunday)}</div>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8fafc; border-radius: 16px; padding: 20px 24px; margin-bottom: 30px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Mitarbeiter</div>
+                            <div style="font-size: 18px; font-weight: 700; color: #0f172a;">${appState.name || 'Nicht angegeben'}</div>
+                        </div>
+                        ${bereitschaftText ? `
+                        <div style="flex: 1; text-align: right;">
+                            <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Bereitschaft</div>
+                            <div style="font-size: 16px; font-weight: 600; color: #0ea5e9;">${bereitschaftText}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    <div style="margin-bottom: 40px;">
+                        <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px;">
+                            <thead>
+                                <tr>
+                                    <th style="padding: 14px 16px; text-align: left; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0; width: 15%;">Datum</th>
+                                    <th style="padding: 14px 16px; text-align: left; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0; width: 25%;">Projekt</th>
+                                    <th style="padding: 14px 16px; text-align: left; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0; width: 33%;">Tätigkeit</th>
+                                    <th style="padding: 14px 16px; text-align: right; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0; width: 10%;">Std.</th>
+                                    <th style="padding: 14px 16px; text-align: left; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0; width: 17%;">Zusatz</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+
+            let hasEntries = false;
+            for (let i = 0; i < 7; i++) {
+                let d = getDateForIndex(i);
+                let dayData = appState.entries[getDateString(d)] || [];
+                const validEntries = dayData.filter(e => e.baustelle.trim() || e.arbeit.trim() || parseFloat(e.stunden) > 0 || (e.zusatz && e.zusatz.length > 0));
+
+                if (validEntries.length > 0) {
+                    hasEntries = true;
+                    validEntries.forEach((entry, index) => {
+                        const stunden = parseFloat(entry.stunden) || 0;
+                        totalWeekHours += stunden;
+
+                        const zList = Array.isArray(entry.zusatz) ? entry.zusatz : [];
+                        if (zList.includes('Auslöse')) countAusloese++;
+                        if (zList.includes('Übernachtung')) countUebernachtung++;
+                        if (zList.includes('Notdienst')) countNotdienst++;
+                        
+                        let zHtml = zList.map(z => `<span style="display: inline-block; padding: 4px 10px; background: #e0f2fe; color: #0284c7; border-radius: 8px; font-size: 10px; font-weight: 700; margin-right: 4px; margin-bottom: 4px;">${z}</span>`).join('');
+
+                        let rowStyle = index === 0 ? 'border-top: 2px solid #cbd5e1; border-bottom: 1px solid #f1f5f9;' : 'border-bottom: 1px solid #f1f5f9;';
+                        
+                        pdfHtml += `<tr style="${rowStyle}">`;
+                        
+                        if (index === 0) {
+                            pdfHtml += `
+                                <td rowspan="${validEntries.length}" style="padding: 16px; vertical-align: top; background-color: #f8fafc; border-right: 1px solid #f1f5f9;">
+                                    <strong style="color: #0f172a; font-size: 14px;">${dayNames[i]}</strong><br>
+                                    <span style="color: #64748b; font-size: 12px; font-weight:500;">${formatDateShort(d)}</span>
+                                </td>`;
+                        } else {
+                            pdfHtml += `<td style="padding: 16px; border-bottom: 1px solid #f1f5f9; vertical-align: top;"></td>`;
+                        }
+                        
+                        pdfHtml += `
+                                <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; vertical-align: top; font-weight: 600; color: #1e293b;">${entry.baustelle}</td>
+                                <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; vertical-align: top; color: #334155; font-weight: 500;">${entry.arbeit}</td>
+                                <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; vertical-align: top; text-align: right; font-weight: 800; color: #0ea5e9; font-size: 16px;">${stunden > 0 ? stunden.toFixed(2) : ''}</td>
+                                <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; vertical-align: top;">${zHtml}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            }
+
+            if (!hasEntries) {
+                pdfHtml += `<tr><td colspan="5" style="text-align: center; padding: 30px 0; border-bottom: 1px solid #f1f5f9; color: #94a3b8; font-weight: 500;">Keine Einträge in dieser Woche.</td></tr>`;
+            }
+
+            pdfHtml += `
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end;">
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; display: inline-flex; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                            
+                            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: #475569; font-weight: 600; margin-right: 30px;">
+                                <span>Auslöse: <strong style="color:#0f172a;">${countAusloese}x</strong></span>
+                                <span>Übernacht.: <strong style="color:#0f172a;">${countUebernachtung}x</strong></span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; justify-content: flex-start; gap: 10px; font-size: 13px; color: #475569; font-weight: 600;">
+                                <span>Notdienst: <strong style="color:#0f172a;">${countNotdienst}x</strong></span>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; gap: 20px; padding-left: 30px; border-left: 2px solid #cbd5e1; margin-left: 30px;">
+                                <span style="font-size: 16px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 1px;">Gesamt</span>
+                                <span style="font-size: 36px; font-weight: 900; color: #0ea5e9; line-height: 1;">${totalWeekHours.toFixed(2)} <span style="font-size: 18px; font-weight: 700;">h</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+
+            const opt = {
+                margin: 0,
+                filename: `Zeiten_${(appState.name||'Neu').replace(/\s+/g, '_')}_KW${currentKw}.pdf`,
+                image: { type: 'jpeg', quality: 1 }, 
+                html2canvas: { scale: 2, useCORS: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = pdfHtml;
+            html2pdf().set(opt).from(tempDiv.firstElementChild).save();
+        }
+
+        // --- APP INITIALISIERUNG ---
+        window.addEventListener('DOMContentLoaded', initApp);
+
+    </script>
+</body>
+</html>
