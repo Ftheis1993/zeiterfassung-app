@@ -28,6 +28,7 @@
             --danger: #ef4444;
             --danger-bg: #fee2e2;
             --success: #10b981;
+            --success-bg: #d1fae5;
             --input-bg: #f8fafc;
             --pill-bg: #f1f5f9;
             --glass-bg: rgba(255, 255, 255, 0.85);
@@ -46,6 +47,7 @@
             --text-muted: #94a3b8;    
             --border: #1e293b;        
             --danger-bg: rgba(239, 68, 68, 0.15);
+            --success-bg: rgba(16, 185, 129, 0.15);
             --input-bg: #020617;
             --pill-bg: #1e293b;
             --glass-bg: rgba(2, 6, 23, 0.85);
@@ -68,11 +70,15 @@
 
         /* Bento Cards */
         .bento-grid { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
-        .bento-card { background: var(--card-bg); border-radius: var(--radius-xl); padding: 20px; box-shadow: var(--shadow-card); border: 1px solid var(--border); overflow: hidden; }
+        .bento-card { background: var(--card-bg); border-radius: var(--radius-xl); padding: 20px; box-shadow: var(--shadow-card); border: 1px solid var(--border); overflow: hidden; transition: 0.3s; }
+        
         .bento-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
-        .bento-value { font-size: 22px; font-weight: 800; color: var(--text-main); line-height: 1.2; }
+        .bento-value { font-size: 22px; font-weight: 800; color: var(--text-main); line-height: 1.2; display: flex; justify-content: center; align-items: center; gap: 10px; }
         .bento-value.highlight { color: var(--primary); }
         .bento-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500;}
+
+        /* Header Total Badge */
+        .header-badge { font-size: 14px; font-weight: 800; color: var(--success); background: var(--success-bg); padding: 4px 10px; border-radius: 12px; }
 
         /* Navigation Layout for Cards */
         .card-header-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
@@ -99,11 +105,21 @@
             background: var(--input-bg); font-family: inherit; transition: 0.2s;
         }
 
-        /* Entry Cards */
-        .entry-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-card); border: 1px solid var(--border); }
+        /* Entry Cards & Lock-Dimming Effect */
+        .entry-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-card); border: 1px solid var(--border); transition: 0.3s; }
         .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
         .time-row { display: grid; grid-template-columns: 1fr 56px; gap: 12px; align-items: center; margin-bottom: 16px; }
         
+        .locked-dimmed { opacity: 0.45; filter: brightness(0.85); pointer-events: none; }
+        [data-theme="dark"] .locked-dimmed { filter: brightness(0.5); }
+        .locked-dimmed .entry-card { box-shadow: none; border: 1px dashed var(--text-muted); background: var(--bg-color); }
+
+        /* Buttons */
+        .btn-primary { width: 100%; background: var(--primary); color: white; padding: 16px; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-danger { width: 100%; background: var(--danger-bg); color: var(--danger); padding: 16px; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .btn-danger:active { transform: scale(0.98); }
+
         /* 4 Pills Layout */
         .pill-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
         .pill-label { cursor: pointer; text-align: center; }
@@ -114,18 +130,16 @@
         }
         .pill-label input:checked + .pill-text { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
 
-        /* FAB Container */
+        /* FAB Container (Nur noch Plus-Button) */
         .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 40; display: flex; flex-direction: column; gap: 12px; align-items: center; }
-        .fab-small { width: 44px; height: 44px; border-radius: 14px; background: var(--card-bg); color: var(--text-muted); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-card); cursor: pointer; transition: 0.3s; }
         .fab { width: 64px; height: 64px; border-radius: 20px; background: var(--primary); color: white; border: none; font-size: 32px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-float); cursor: pointer; transition: 0.3s; }
-        .fab-small:active, .fab:active { transform: scale(0.9); }
+        .fab:active { transform: scale(0.9); }
 
         /* Modals */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: var(--modal-overlay); backdrop-filter: blur(4px); }
         .sheet-content { background-color: var(--bg-color); position: absolute; bottom: 0; left: 0; width: 100%; border-radius: 32px 32px 0 0; padding: 30px 24px 40px 24px; max-height: 85vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.15); }
         .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .settings-block { background: var(--card-bg); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 16px; border: 1px solid var(--border); }
-        .btn-danger { width: 100%; background: var(--danger-bg); color: var(--danger); padding: 16px; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; }
         
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -169,7 +183,10 @@
 
                     <div class="card-info-clickable" onclick="toggleWeekCollapse()">
                         <div class="bento-label">Wochen-Übersicht</div>
-                        <div class="bento-value highlight" id="weekTitleDisplay">KW --</div>
+                        <div class="bento-value highlight">
+                            <span id="weekTitleDisplay">KW --</span>
+                            <span class="header-badge" id="weekTotalBadge">0.00 h</span>
+                        </div>
                         <div class="bento-sub" id="weekDatesDisplay">--.--. - --.--.</div>
                         <div class="expand-marker" id="expandHint">Details <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg></div>
                     </div>
@@ -180,14 +197,13 @@
                 </div>
 
                 <div class="collapsible-content collapsed" id="weekContent">
-                    <div style="background: var(--input-bg); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 16px; text-align: center;">
-                        <div class="bento-label" style="margin-bottom: 4px;">Gesamtstunden dieser Woche</div>
-                        <div class="bento-value" id="totalWeek">0.00</div>
-                    </div>
-                    <div>
+                    <div style="margin-bottom: 16px;">
                         <div class="bento-label">Bereitschaftsdienst</div>
                         <input type="text" id="in-bereitschaft" class="bento-input" placeholder="Zeitraum eintragen..." oninput="saveBereitschaft()">
                     </div>
+                    <button id="innerLockBtn" onclick="toggleSubmittedAction()" class="btn-primary">
+                        🔒 Periode sperren
+                    </button>
                 </div>
             </div>
 
@@ -212,13 +228,14 @@
         </div>
 
         <div class="entries-header" style="font-weight: 800; font-size: 18px; margin-bottom: 12px; padding-left: 4px;">Einträge</div>
-        <div id="entryList"></div>
+        
+        <div id="entriesWrapper">
+            <div id="entryList"></div>
+        </div>
 
     </div>
 
     <div class="fab-container">
-        <button class="fab-small" id="lockWeekBtn" onclick="toggleSubmittedAction()" title="Woche sperren/entsperren">
-            </button>
         <button class="fab" id="addEntryBtn" onclick="addEmptyCard()" title="Neuer Eintrag">
             <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg>
         </button>
@@ -231,7 +248,7 @@
                 <button class="nav-icon" onclick="closeSettings()" style="width:36px; height:36px;">✕</button>
             </div>
             <div class="settings-block">
-                <label class="bento-label">Dein Name (PDF)</label>
+                <label class="bento-label">Dein Name (Für PDF Export)</label>
                 <input type="text" id="userName" class="bento-input" placeholder="Vorname Nachname">
             </div>
             <div class="settings-block">
@@ -243,10 +260,21 @@
                     </label>
                 </div>
             </div>
-            <div class="settings-block" style="border-color: var(--danger-bg);">
-                <label class="bento-label" style="color: var(--danger);">Alle Inhalte Löschen</label>
-                <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 12px 0;">Hiermit entfernst du alle gespeicherten Zeiten permanent.</p>
-                <button class="btn-danger" onclick="resetAllData()">Daten jetzt löschen</button>
+            
+            <div class="settings-block" style="background: transparent; border: none; padding: 0;">
+                <button class="btn-primary" onclick="saveSettings()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    Einstellungen speichern
+                </button>
+            </div>
+
+            <div class="settings-block" style="border-color: var(--danger-bg); margin-top: 30px;">
+                <label class="bento-label" style="color: var(--danger);">Gefahrenzone</label>
+                <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 12px 0;">Hiermit entfernst du alle gespeicherten Zeiten permanent von diesem Gerät.</p>
+                <button class="btn-danger" onclick="resetAllData()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+                    Daten jetzt löschen
+                </button>
             </div>
             <p class="creator-note">Erstellt von <strong>F.Theis</strong></p>
         </div>
@@ -266,6 +294,7 @@
         const dayNames = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
         let appState = { mondayDate: null, dayIndex: 0, name: '', entries: {}, submittedWeeks: {}, weeklyBereitschaft: {}, theme: 'dark' };
 
+        // --- Core Date & Period Logic ---
         function getMonday(d) {
             let date = new Date(d); date.setHours(0,0,0,0);
             let day = date.getDay(); let diff = date.getDate() - day + (day === 0 ? -6 : 1);
@@ -290,6 +319,25 @@
             return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
         }
 
+        function getCurrentPeriod() {
+            let currentDate = getDateForIndex(appState.dayIndex, appState.mondayDate);
+            let targetMonth = currentDate.getMonth();
+            let periodStart = null;
+            let periodEnd = null;
+            let validIndices = [];
+
+            for (let i = 0; i < 7; i++) {
+                let d = getDateForIndex(i, appState.mondayDate);
+                if (d.getMonth() === targetMonth) {
+                    if (!periodStart) periodStart = d;
+                    periodEnd = d;
+                    validIndices.push(i);
+                }
+            }
+            return { currentDate, targetMonth, periodStart, periodEnd, validIndices, periodKey: getDateString(periodStart) };
+        }
+
+        // --- UI Functions ---
         function toggleWeekCollapse() {
             const content = document.getElementById('weekContent');
             const hint = document.getElementById('expandHint');
@@ -321,39 +369,42 @@
         }
 
         function renderApp() {
-            let sunday = new Date(appState.mondayDate); sunday.setDate(sunday.getDate() + 6);
-            let mondayStr = getDateString(appState.mondayDate);
-            document.getElementById('weekTitleDisplay').innerText = `KW ${getWeekNumber(appState.mondayDate)}`;
-            document.getElementById('weekDatesDisplay').innerText = `${formatDateVeryShort(appState.mondayDate)} – ${formatDateVeryShort(sunday)}`;
+            let period = getCurrentPeriod();
+            let pKey = period.periodKey;
+
+            document.getElementById('weekTitleDisplay').innerText = `KW ${getWeekNumber(period.currentDate)}`;
+            document.getElementById('weekDatesDisplay').innerText = `${formatDateVeryShort(period.periodStart)} - ${formatDateVeryShort(period.periodEnd)}`;
             
-            let isLocked = !!appState.submittedWeeks[mondayStr];
+            let isLocked = !!appState.submittedWeeks[pKey];
             document.getElementById('userName').value = appState.name;
-            document.getElementById('in-bereitschaft').value = appState.weeklyBereitschaft[mondayStr] || '';
+            document.getElementById('in-bereitschaft').value = appState.weeklyBereitschaft[pKey] || '';
             document.getElementById('in-bereitschaft').disabled = isLocked;
             
-            let currentDate = getDateForIndex(appState.dayIndex);
-            document.getElementById('dayTitleDisplay').innerText = `${dayNames[appState.dayIndex]}, ${formatDateVeryShort(currentDate)}`;
-            document.getElementById('prevDayBtn').disabled = appState.dayIndex === 0;
-            document.getElementById('nextDayBtn').disabled = appState.dayIndex === 6;
+            document.getElementById('dayTitleDisplay').innerText = `${dayNames[appState.dayIndex]}, ${formatDateVeryShort(period.currentDate)}`;
             
-            // Lock Button Logic
-            const lockBtn = document.getElementById('lockWeekBtn');
+            document.getElementById('prevDayBtn').disabled = (appState.dayIndex === period.validIndices[0]);
+            document.getElementById('nextDayBtn').disabled = (appState.dayIndex === period.validIndices[period.validIndices.length - 1]);
+            
+            // UI Anpassungen für Lock-Status
+            const lockBtn = document.getElementById('innerLockBtn');
             const addBtn = document.getElementById('addEntryBtn');
+            const entriesWrapper = document.getElementById('entriesWrapper');
+
             addBtn.style.display = isLocked ? 'none' : 'flex';
             
             if (isLocked) {
-                lockBtn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
-                lockBtn.style.color = 'var(--danger)';
-                lockBtn.style.borderColor = 'var(--danger)';
+                lockBtn.innerHTML = `🔓 Periode entsperren`;
                 lockBtn.style.background = 'var(--danger-bg)';
+                lockBtn.style.color = 'var(--danger)';
+                entriesWrapper.classList.add('locked-dimmed');
             } else {
-                lockBtn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
-                lockBtn.style.color = 'var(--text-main)';
-                lockBtn.style.borderColor = 'var(--border)';
-                lockBtn.style.background = 'var(--card-bg)';
+                lockBtn.innerHTML = `🔒 Periode abschließen & sperren`;
+                lockBtn.style.background = 'var(--primary-light)';
+                lockBtn.style.color = 'var(--primary)';
+                entriesWrapper.classList.remove('locked-dimmed');
             }
 
-            let dateStr = getDateString(currentDate);
+            let dateStr = getDateString(period.currentDate);
             let dayData = appState.entries[dateStr] || [];
             const list = document.getElementById('entryList');
             list.innerHTML = ''; 
@@ -363,46 +414,33 @@
         }
 
         function toggleSubmittedAction() {
-            let mondayStr = getDateString(appState.mondayDate);
-            let isCurrentlyLocked = !!appState.submittedWeeks[mondayStr];
+            let period = getCurrentPeriod();
+            let pKey = period.periodKey;
+            let isCurrentlyLocked = !!appState.submittedWeeks[pKey];
             
             if (isCurrentlyLocked) {
-                if (!confirm("Möchtest du diese Woche wieder entsperren und bearbeiten?")) return;
-                appState.submittedWeeks[mondayStr] = false;
+                if (!confirm("Möchtest du diesen Zeitraum wieder entsperren und bearbeiten?")) return;
+                appState.submittedWeeks[pKey] = false;
             } else {
-                appState.submittedWeeks[mondayStr] = true;
+                appState.submittedWeeks[pKey] = true;
             }
             saveToStorage(); 
             renderApp(); 
         }
 
-        // --- URLAUB LOGIK ---
         function handleUrlaub(cb) {
             if (cb.checked) {
                 const card = cb.closest('.entry-card');
                 const stundenInput = card.querySelector('.in-stunden');
                 const baustelleInput = card.querySelector('.in-baustelle');
                 
-                // Mo(0) bis Do(3) -> 8 Stunden
-                if (appState.dayIndex >= 0 && appState.dayIndex <= 3) {
-                    stundenInput.value = '8';
-                } 
-                // Fr(4) -> 6 Stunden
-                else if (appState.dayIndex === 4) {
-                    stundenInput.value = '6';
-                } 
-                // Wochenende -> 0 Stunden
-                else {
-                    stundenInput.value = '0';
-                }
+                if (appState.dayIndex >= 0 && appState.dayIndex <= 3) { stundenInput.value = '8'; } 
+                else if (appState.dayIndex === 4) { stundenInput.value = '6'; } 
+                else { stundenInput.value = '0'; }
 
-                // Trägt "Urlaub" in Projekt ein, falls leer
-                if (!baustelleInput.value) {
-                    baustelleInput.value = 'Urlaub';
-                }
+                if (!baustelleInput.value) baustelleInput.value = 'Urlaub';
                 
-                saveCurrentDay();
-                updateTotals();
+                saveCurrentDay(); updateTotals();
             }
         }
 
@@ -436,36 +474,80 @@
         }
 
         function deleteCard(btn) { btn.closest('.entry-card').remove(); saveCurrentDay(); updateTotals(); if(document.getElementById('entryList').children.length === 0) addEmptyCard(); }
-        function saveBereitschaft() { appState.weeklyBereitschaft[getDateString(appState.mondayDate)] = document.getElementById('in-bereitschaft').value; saveToStorage(); }
+        
+        function saveBereitschaft() { 
+            let period = getCurrentPeriod();
+            appState.weeklyBereitschaft[period.periodKey] = document.getElementById('in-bereitschaft').value; 
+            saveToStorage(); 
+        }
+        
         function changeDay(delta) { saveCurrentDay(); appState.dayIndex += delta; renderApp(); }
-        function changeWeek(delta) { saveCurrentDay(); appState.mondayDate.setDate(appState.mondayDate.getDate() + (delta * 7)); appState.dayIndex = 0; renderApp(); }
+        function changeWeek(delta) { 
+            saveCurrentDay(); 
+            let period = getCurrentPeriod();
+            let newDate = delta === 1 ? new Date(period.periodEnd) : new Date(period.periodStart);
+            newDate.setDate(newDate.getDate() + (delta === 1 ? 1 : -1));
+            appState.mondayDate = getMonday(newDate);
+            let day = newDate.getDay();
+            appState.dayIndex = day === 0 ? 6 : day - 1;
+            renderApp(); 
+        }
         
         function openSettings() { document.getElementById('settingsModal').style.display = 'block'; }
         function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
         
+        function saveSettings() {
+            appState.name = document.getElementById('userName').value;
+            saveToStorage();
+            closeSettings();
+            renderApp();
+        }
+
         function openOverview() {
             saveCurrentDay();
             const list = document.getElementById('overviewList');
             list.innerHTML = '';
-            let weeksMap = new Map();
+            let periodsMap = new Map();
+            
             for (const [dateStr, entries] of Object.entries(appState.entries)) {
-                let monday = getMonday(new Date(dateStr));
-                let mStr = getDateString(monday);
-                if (!weeksMap.has(mStr)) {
-                    weeksMap.set(mStr, { date: monday, hours: 0, locked: !!appState.submittedWeeks[mStr] });
+                let d = new Date(dateStr);
+                let monday = getMonday(d);
+                let targetMonth = d.getMonth();
+                
+                let pStart = null;
+                let pEnd = null;
+                for (let i = 0; i < 7; i++) {
+                    let iterD = new Date(monday);
+                    iterD.setDate(iterD.getDate() + i);
+                    if (iterD.getMonth() === targetMonth) {
+                        if (!pStart) pStart = new Date(iterD);
+                        pEnd = new Date(iterD);
+                    }
                 }
-                entries.forEach(e => weeksMap.get(mStr).hours += parseFloat(e.stunden) || 0);
+                
+                let pKey = getDateString(pStart);
+                
+                if (!periodsMap.has(pKey)) {
+                    periodsMap.set(pKey, { start: pStart, end: pEnd, hours: 0, locked: !!appState.submittedWeeks[pKey], kw: getWeekNumber(pStart) });
+                }
+                entries.forEach(e => periodsMap.get(pKey).hours += parseFloat(e.stunden) || 0);
             }
-            Array.from(weeksMap.values()).sort((a,b)=>b.date-a.date).forEach(w => {
+            
+            Array.from(periodsMap.values()).sort((a,b)=>b.start-a.start).forEach(p => {
                 let div = document.createElement('div');
                 div.style = "padding:16px; background:var(--card-bg); border:1px solid var(--border); border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;";
                 
-                let lockBadge = w.locked 
+                let lockBadge = p.locked 
                     ? `<span style="background:var(--danger-bg); color:var(--danger); padding:4px 8px; border-radius:6px; font-size:10px; font-weight:800; text-transform:uppercase; margin-top:6px; display:inline-block;">Gesperrt <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="vertical-align:middle; margin-bottom:2px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>` 
                     : `<span style="background:var(--primary-light); color:var(--primary); padding:4px 8px; border-radius:6px; font-size:10px; font-weight:800; text-transform:uppercase; margin-top:6px; display:inline-block;">Offen <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="vertical-align:middle; margin-bottom:2px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></span>`;
 
-                div.innerHTML = `<div><strong>KW ${getWeekNumber(w.date)}</strong><br><small style="color:var(--text-muted);">${formatDateVeryShort(w.date)} - ${formatDateVeryShort(new Date(w.date.getTime() + 6*86400000))}</small><br>${lockBadge}</div><div style="font-weight:800; color:var(--primary); font-size:20px;">${w.hours.toFixed(2)} h</div>`;
-                div.onclick = () => { appState.mondayDate = w.date; appState.dayIndex = 0; renderApp(); closeOverview(); };
+                div.innerHTML = `<div><strong>KW ${p.kw}</strong><br><small style="color:var(--text-muted);">${formatDateVeryShort(p.start)} - ${formatDateVeryShort(p.end)}</small><br>${lockBadge}</div><div style="font-weight:800; color:var(--primary); font-size:20px;">${p.hours.toFixed(2)} h</div>`;
+                div.onclick = () => { 
+                    appState.mondayDate = getMonday(p.start); 
+                    let day = p.start.getDay();
+                    appState.dayIndex = day === 0 ? 6 : day - 1;
+                    renderApp(); closeOverview(); 
+                };
                 list.appendChild(div);
             });
             document.getElementById('overviewModal').style.display = 'block';
@@ -489,11 +571,14 @@
         function updateTotals() {
             let dTot = 0; document.querySelectorAll('.in-stunden').forEach(i => dTot += parseFloat(i.value) || 0);
             document.getElementById('dailyTotal').innerText = dTot.toFixed(2);
-            let wTot = 0; for(let i=0; i<7; i++) {
-                let data = appState.entries[getDateString(getDateForIndex(i))] || [];
+            
+            let wTot = 0; 
+            let period = getCurrentPeriod();
+            period.validIndices.forEach(i => {
+                let data = appState.entries[getDateString(getDateForIndex(i, appState.mondayDate))] || [];
                 data.forEach(e => wTot += parseFloat(e.stunden) || 0);
-            }
-            document.getElementById('totalWeek').innerText = wTot.toFixed(2);
+            });
+            document.getElementById('weekTotalBadge').innerText = wTot.toFixed(2) + ' h';
         }
 
         function saveToStorage() { localStorage.setItem('wochenstunden_pro', JSON.stringify(appState)); }
@@ -515,26 +600,58 @@
             }
         }
 
+        // --- NEW PDF LAYOUT & SHARING ---
         async function generatePDF(shouldShare = false) {
             saveCurrentDay();
+            let period = getCurrentPeriod();
             let total = 0, cA = 0, cU = 0, cN = 0, cUrl = 0;
-            let kw = getWeekNumber(appState.mondayDate);
-            let bTxt = appState.weeklyBereitschaft[getDateString(appState.mondayDate)] || '';
-            let fileName = `Stundenzettel_KW${kw}_${(appState.name||'Mitarbeiter').replace(/\s+/g, '_')}.pdf`;
-
-            let html = `<div style="font-family:'Outfit',sans-serif; padding:40px; color:#0f172a; min-height: 280mm; display: flex; flex-direction: column;">
-                <div style="display:flex; justify-content:space-between; border-bottom:2px solid #f1f5f9; padding-bottom:20px; margin-bottom:30px;">
-                    <h1 style="font-size:36px; margin:0; font-weight:800;">Stundenzettel<span style="color:#0ea5e9;">.</span></h1>
-                    <div style="text-align:right;"><strong>Kalenderwoche ${kw}</strong><br>${formatDateShort(appState.mondayDate)} - ${formatDateShort(getDateForIndex(6))}</div>
-                </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:30px;">
-                    <div style="background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #e2e8f0;"><small style="color:#64748b; text-transform:uppercase; font-weight:700;">Mitarbeiter</small><br><strong style="font-size:16px;">${appState.name || '-'}</strong></div>
-                    <div style="background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #e2e8f0;"><small style="color:#64748b; text-transform:uppercase; font-weight:700;">Bereitschaft</small><br><strong style="font-size:16px;">${bTxt || '-'}</strong></div>
-                </div>
-                <table style="width:100%; border-collapse:collapse; font-size:12px; flex-grow: 1;">
-                    <tr style="background:#f1f5f9;"><th style="padding:12px; text-align:left;">Tag</th><th style="padding:12px; text-align:left;">Projekt</th><th style="padding:12px; text-align:left;">Tätigkeit</th><th style="padding:12px; text-align:center;">Std.</th><th style="padding:12px; text-align:left;">Extras</th></tr>`;
+            let kw = getWeekNumber(period.currentDate);
+            let bTxt = appState.weeklyBereitschaft[period.periodKey] || '';
             
-            for(let i=0; i<7; i++) {
+            let safeName = appState.name ? appState.name.replace(/\s+/g, '_') : 'Mitarbeiter';
+            let fileName = `Arbeitsnachweis_KW${kw}_${formatDateVeryShort(period.periodStart).replace('.','')}_${safeName}.pdf`;
+
+            let html = `
+            <div style="font-family: 'Outfit', sans-serif; padding: 50px; color: #0f172a; background: #ffffff; min-height: 280mm; display: flex; flex-direction: column;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #0ea5e9; padding-bottom: 20px; margin-bottom: 30px;">
+                    <div>
+                        <h1 style="font-size: 42px; margin: 0; font-weight: 900; letter-spacing: -1px; color: #0f172a;">ARBEITSNACHWEIS</h1>
+                        <p style="margin: 5px 0 0 0; font-size: 16px; color: #64748b; font-weight: 500;">Erstellt mit Zeiterfassung Pro</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Abrechnungszeitraum</div>
+                        <div style="font-size: 26px; font-weight: 800; color: #0ea5e9; margin: 2px 0;">KW ${kw}</div>
+                        <div style="font-size: 14px; font-weight: 600; color: #0f172a;">${formatDateShort(period.periodStart)} – ${formatDateShort(period.periodEnd)}</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 40px; background: #f8fafc; padding: 20px 25px; border-radius: 12px; margin-bottom: 40px; border: 1px solid #e2e8f0;">
+                    <div style="flex: 1;">
+                        <div style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Mitarbeiter / Monteur</div>
+                        <div style="font-size: 18px; font-weight: 700; color: #0f172a;">${appState.name || 'Nicht angegeben'}</div>
+                    </div>
+                    <div style="width: 1px; background: #cbd5e1;"></div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Bereitschaftsdienst</div>
+                        <div style="font-size: 16px; font-weight: 600; color: ${bTxt ? '#0ea5e9' : '#64748b'};">${bTxt || 'Kein Dienst'}</div>
+                    </div>
+                </div>
+
+                <div style="flex-grow: 1;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 12px 10px; text-align: left; color: #64748b; font-weight: 800; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1;">Datum</th>
+                                <th style="padding: 12px 10px; text-align: left; color: #64748b; font-weight: 800; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1;">Projekt / Ort</th>
+                                <th style="padding: 12px 10px; text-align: left; color: #64748b; font-weight: 800; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1;">Tätigkeit</th>
+                                <th style="padding: 12px 10px; text-align: center; color: #64748b; font-weight: 800; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1;">Dauer</th>
+                                <th style="padding: 12px 10px; text-align: left; color: #64748b; font-weight: 800; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1;">Zulagen</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            
+            for(let i of period.validIndices) {
                 let dayEntries = appState.entries[getDateString(getDateForIndex(i))] || [];
                 dayEntries.filter(e => parseFloat(e.stunden) > 0 || e.baustelle).forEach((e, idx) => {
                     let s = parseFloat(e.stunden) || 0; total += s;
@@ -543,37 +660,73 @@
                     if(e.zusatz.includes('Notdienst')) cN++;
                     if(e.zusatz.includes('Urlaub')) cUrl++;
                     
-                    html += `<tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:12px;">${idx===0?`<strong>${dayNames[i]}</strong>`:''}</td><td style="padding:12px; color:#0ea5e9; font-weight:700;">${e.baustelle}</td><td style="padding:12px;">${e.arbeit}</td><td style="padding:12px; text-align:center; font-weight:800; font-size:14px;">${s.toFixed(2)}</td><td style="padding:12px;">${e.zusatz.join(', ')}</td></tr>`;
+                    let extrasHtml = e.zusatz.map(z => `<span style="display: inline-block; padding: 2px 6px; background: #e0f2fe; color: #0284c7; border-radius: 4px; font-size: 9px; font-weight: 700; margin-right: 4px; margin-bottom: 2px;">${z}</span>`).join('');
+
+                    html += `
+                            <tr>
+                                <td style="padding: 14px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top;">${idx===0?`<strong style="color:#0f172a;">${dayNames[i]}</strong>`:''}</td>
+                                <td style="padding: 14px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; color: #0ea5e9; font-weight: 700;">${e.baustelle}</td>
+                                <td style="padding: 14px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; color: #334155; max-width: 200px;">${e.arbeit}</td>
+                                <td style="padding: 14px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; text-align: center; font-weight: 800; font-size: 14px; color: #0f172a;">${s.toFixed(2)} h</td>
+                                <td style="padding: 14px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top;">${extrasHtml}</td>
+                            </tr>`;
                 });
             }
-            html += `</table>
-                <div style="margin-top:auto; padding-top:40px; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; gap:6px;">
-                        <div style="flex:1; background:#f8fafc; padding:10px 5px; border-radius:8px; border:1px solid #e2e8f0; text-align:center; min-width:65px;"><small style="font-size:8px; color:#64748b; font-weight:800;">AUSLÖSE</small><br><strong>${cA}x</strong></div>
-                        <div style="flex:1; background:#f8fafc; padding:10px 5px; border-radius:8px; border:1px solid #e2e8f0; text-align:center; min-width:65px;"><small style="font-size:8px; color:#64748b; font-weight:800;">ÜBERNACHT.</small><br><strong>${cU}x</strong></div>
-                        <div style="flex:1; background:#f8fafc; padding:10px 5px; border-radius:8px; border:1px solid #e2e8f0; text-align:center; min-width:65px;"><small style="font-size:8px; color:#64748b; font-weight:800;">NOTDIENST</small><br><strong>${cN}x</strong></div>
-                        <div style="flex:1; background:#f8fafc; padding:10px 5px; border-radius:8px; border:1px solid #e2e8f0; text-align:center; min-width:65px;"><small style="font-size:8px; color:#64748b; font-weight:800;">URLAUB</small><br><strong>${cUrl}x</strong></div>
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 40px; display: flex; justify-content: space-between; align-items: stretch; gap: 20px;">
+                    
+                    <div style="flex: 1; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #ffffff;">
+                        <div style="background: #f8fafc; padding: 10px 15px; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #e2e8f0;">Übersicht Zulagen</div>
+                        <div style="display: flex; justify-content: space-around; padding: 15px 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 22px; font-weight: 900; color: #0f172a;">${cA}</div>
+                                <div style="font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-top: 4px;">Auslöse</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 22px; font-weight: 900; color: #0f172a;">${cU}</div>
+                                <div style="font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-top: 4px;">Übernacht.</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 22px; font-weight: 900; color: #0f172a;">${cN}</div>
+                                <div style="font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-top: 4px;">Notdienst</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 22px; font-weight: 900; color: #0f172a;">${cUrl}</div>
+                                <div style="font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-top: 4px;">Urlaub</div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="background:#0f172a; color:white; padding:15px 25px; border-radius:15px; text-align:right; margin-left: 10px;">
-                        <small style="opacity:0.7; font-weight:700;">GESAMTWOCHE</small><br>
-                        <strong style="font-size:32px; color:#0ea5e9;">${total.toFixed(2)} h</strong>
+
+                    <div style="background: #0ea5e9; color: #ffffff; border-radius: 12px; padding: 20px 30px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; min-width: 180px;">
+                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; margin-bottom: 5px;">Gesamtsumme Periode</div>
+                        <div style="font-size: 42px; font-weight: 900; line-height: 1;">${total.toFixed(2)}<span style="font-size: 20px; font-weight: 600; opacity: 0.8; margin-left: 6px;">h</span></div>
                     </div>
+
                 </div>
             </div>`;
 
-            const worker = html2pdf().set({ margin:0, filename:fileName, html2canvas:{scale:3}, jsPDF:{unit:'mm', format:'a4'} }).from(html);
+            const worker = html2pdf().set({ 
+                margin: 0, 
+                filename: fileName, 
+                html2canvas: { scale: 3, useCORS: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            }).from(html);
 
             if (shouldShare && navigator.canShare && navigator.share) {
                 const pdfBlob = await worker.output('blob');
                 const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
                 
-                let nameStr = appState.name ? appState.name + ' ' : '';
-                let shareText = `Stundenzettel ${nameStr}KW ${kw} / ${formatDateVeryShort(appState.mondayDate)} - ${formatDateVeryShort(getDateForIndex(6))}`;
+                let nameStr = appState.name ? `[ ${appState.name} ] ` : '';
+                let shareText = `Arbeitsnachweis ${nameStr}KW ${kw} / ${formatDateVeryShort(period.periodStart)} - ${formatDateVeryShort(period.periodEnd)}`;
 
                 try {
                     await navigator.share({ 
                         files: [file], 
-                        title: `Stundenzettel KW ${kw}`, 
+                        title: `Arbeitsnachweis KW ${kw}`, 
                         text: shareText 
                     });
                 } catch (err) {
