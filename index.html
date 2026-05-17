@@ -6,7 +6,7 @@
     <title>Zeiterfassung Pro</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#09090b">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,67 +17,93 @@
     
     <style>
         :root {
-            /* Modernized Color Palette */
-            --primary: #3b82f6;       
-            --primary-hover: #2563eb;
-            --primary-gradient: linear-gradient(135deg, #3b82f6, #0ea5e9);
-            --primary-light: #eff6ff;
-            --bg-color: #f8fafc;      
-            --card-bg: #ffffff;       
-            --text-main: #0f172a;     
-            --text-muted: #64748b;    
-            --border: #e2e8f0;        
+            /* Fully Dark & Neon Modern Palette */
+            --primary: #0ea5e9;       
+            --primary-hover: #38bdf8;
+            --primary-gradient: linear-gradient(135deg, #0ea5e9, #3b82f6);
+            --primary-light: rgba(14, 165, 233, 0.15);
+            
+            /* Deep Space / Slate Colors */
+            --bg-color: #09090b;      
+            --card-bg: #18181b;       
+            --text-main: #f4f4f5;     
+            --text-muted: #a1a1aa;    
+            --border: #27272a;        
+            
+            /* Status Colors */
             --danger: #f43f5e;
-            --danger-bg: #ffe4e6;
+            --danger-bg: rgba(244, 63, 94, 0.15);
             --success: #10b981;
-            --success-bg: #d1fae5;
-            --input-bg: #f1f5f9;
-            --pill-bg: #f1f5f9;
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --modal-overlay: rgba(15, 23, 42, 0.4);
+            --success-bg: rgba(16, 185, 129, 0.15);
+            
+            /* UI Elements */
+            --input-bg: #09090b;
+            --pill-bg: #27272a;
+            --glass-bg: rgba(24, 24, 27, 0.85);
+            --modal-overlay: rgba(0, 0, 0, 0.85);
             
             /* Modern Radii & Shadows */
             --radius-xl: 28px;
             --radius-lg: 20px;
             --radius-md: 14px;
             --radius-pill: 100px;
-            --shadow-float: 0 20px 40px -10px rgba(14, 165, 233, 0.35);
-            --shadow-card: 0 12px 32px -4px rgba(0, 0, 0, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.02);
-            --dark-blue: #1e3a8a; 
-        }
-
-        [data-theme="dark"] {
-            /* Deep, Rich Dark Mode */
-            --primary: #0ea5e9;
-            --primary-hover: #38bdf8;
-            --primary-gradient: linear-gradient(135deg, #0ea5e9, #3b82f6);
-            --primary-light: rgba(14, 165, 233, 0.15);
-            --bg-color: #0b1120;      
-            --card-bg: #111827;       
-            --text-main: #f8fafc;     
-            --text-muted: #94a3b8;    
-            --border: rgba(255, 255, 255, 0.08);        
-            --danger-bg: rgba(244, 63, 94, 0.15);
-            --success-bg: rgba(16, 185, 129, 0.15);
-            --input-bg: rgba(255, 255, 255, 0.04);
-            --pill-bg: rgba(255, 255, 255, 0.05);
-            --glass-bg: rgba(11, 17, 32, 0.75);
-            --modal-overlay: rgba(0, 0, 0, 0.75);
-            --shadow-card: 0 16px 40px -8px rgba(0, 0, 0, 0.4);
+            --shadow-float: 0 20px 40px -10px rgba(14, 165, 233, 0.5);
+            --shadow-card: 0 16px 40px -8px rgba(0, 0, 0, 0.6);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Outfit', sans-serif; margin: 0; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s ease; padding-bottom: 120px; }
+        body { font-family: 'Outfit', sans-serif; margin: 0; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 180px; }
 
-        /* AppBar - Floating Glass Effect */
-        .app-bar { position: sticky; top: 0; z-index: 40; background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+        /* AppBar - Centered Title */
+        .app-bar { position: sticky; top: 0; z-index: 40; background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 20px; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid var(--border); box-shadow: 0 4px 30px rgba(0,0,0,0.5); }
         .app-title { font-size: 24px; font-weight: 900; margin: 0; letter-spacing: -0.5px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .app-actions { display: flex; gap: 8px; }
-        .nav-icon { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: var(--shadow-card); flex-shrink: 0; padding: 0; }
-        .nav-icon:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+
+        /* Normal Nav Icons inside App */
+        .nav-icon { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0; padding: 0; }
+        .nav-icon:hover { background: var(--pill-bg); }
         .nav-icon:active { transform: scale(0.95); }
-        .nav-icon.accent { background: var(--primary-gradient); color: white; border: none; }
         .nav-icon:disabled { opacity: 0.2; cursor: default; transform: none; box-shadow: none; }
+
+        /* NEW: Bottom Navigation Dock (Glowing) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 12px 16px;
+            border-radius: var(--radius-pill);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            z-index: 90;
+            width: max-content;
+        }
+
+        .bottom-nav .nav-icon {
+            width: 48px;
+            height: 48px;
+            box-shadow: none;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            border-radius: 50%;
+        }
+        
+        .bottom-nav .nav-icon:hover, .bottom-nav .nav-icon:active {
+            background: var(--pill-bg);
+            color: var(--text-main);
+        }
+        
+        .bottom-nav .nav-icon.accent {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
+        }
 
         .container { max-width: 600px; margin: 0 auto; padding: 24px 20px; }
 
@@ -114,15 +140,14 @@
         .input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
         .time-row { display: grid; grid-template-columns: 1fr 60px; gap: 12px; align-items: center; margin-bottom: 20px; }
         
-        .locked-dimmed { opacity: 0.45; filter: grayscale(0.2); pointer-events: none; }
-        .locked-dimmed .entry-card { box-shadow: none; border: 1px dashed var(--text-muted); background: transparent; }
+        .locked-dimmed { opacity: 0.45; filter: grayscale(0.6); pointer-events: none; }
+        .locked-dimmed .entry-card { box-shadow: none; border: 1px dashed var(--border); background: transparent; }
 
         /* Buttons */
-        .btn-primary { width: 100%; background: var(--primary-gradient); color: white; padding: 18px; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 800; letter-spacing: 0.5px; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 8px 20px -6px rgba(59, 130, 246, 0.4); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -6px rgba(59, 130, 246, 0.5); }
-        .btn-primary:active { transform: scale(0.97); box-shadow: 0 4px 10px -4px rgba(59, 130, 246, 0.4); }
+        .btn-primary { width: 100%; background: var(--primary-gradient); color: white; padding: 18px; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 800; letter-spacing: 0.5px; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: var(--shadow-float); }
+        .btn-primary:active { transform: scale(0.97); }
         
-        .btn-danger { width: 100%; background: var(--danger-bg); color: var(--danger); padding: 18px; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .btn-danger { width: 100%; background: var(--danger-bg); color: var(--danger); padding: 18px; border: 1px solid rgba(244, 63, 94, 0.2); border-radius: var(--radius-md); font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 8px;}
         .btn-danger:active { transform: scale(0.97); }
 
         /* 4 Pills Layout - Modern Segmented Style */
@@ -133,30 +158,22 @@
             display: block; padding: 12px 0px; background: var(--pill-bg); color: var(--text-muted);
             border-radius: var(--radius-pill); font-size: 9px; font-weight: 800; border: 1px solid transparent; transition: all 0.25s ease; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;
         }
-        .pill-label input:checked + .pill-text { background: var(--primary-light); color: var(--primary); border-color: var(--primary); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); transform: translateY(-1px); }
+        .pill-label input:checked + .pill-text { background: var(--primary-light); color: var(--primary); border-color: var(--primary); box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2); transform: translateY(-1px); }
 
-        /* FAB Container */
-        .fab-container { position: fixed; bottom: 32px; right: 32px; z-index: 40; display: flex; flex-direction: column; gap: 12px; align-items: center; }
-        .fab { width: 68px; height: 68px; border-radius: 22px; background: var(--primary-gradient); color: white; border: none; font-size: 32px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-float); cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .fab:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 24px 40px -10px rgba(14, 165, 233, 0.5); }
+        /* FAB Container (Nach oben geschoben wegen neuem Menü) */
+        .fab-container { position: fixed; bottom: 120px; right: 24px; z-index: 40; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+        .fab { width: 64px; height: 64px; border-radius: 22px; background: var(--primary-gradient); color: white; border: none; font-size: 32px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-float); cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .fab:hover { transform: translateY(-4px) scale(1.02); }
         .fab:active { transform: scale(0.92); }
 
-        /* Modals & New Settings Styling */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: var(--modal-overlay); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: opacity 0.3s; }
-        .sheet-content { background-color: var(--bg-color); position: absolute; bottom: 0; left: 0; width: 100%; border-radius: 32px 32px 0 0; padding: 32px 24px 48px 24px; max-height: 88vh; overflow-y: auto; box-shadow: 0 -20px 50px rgba(0,0,0,0.2); }
+        /* Modals & Settings Styling */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: var(--modal-overlay); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+        .sheet-content { background-color: var(--bg-color); position: absolute; bottom: 0; left: 0; width: 100%; border-radius: 32px 32px 0 0; padding: 32px 24px 48px 24px; max-height: 88vh; overflow-y: auto; box-shadow: 0 -20px 50px rgba(0,0,0,0.8); border-top: 1px solid rgba(255,255,255,0.05); }
         .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
         
-        .settings-group { background: var(--card-bg); border-radius: var(--radius-lg); padding: 0; margin-bottom: 24px; box-shadow: var(--shadow-card); border: 1px solid var(--border); overflow: hidden; }
+        .settings-group { background: var(--card-bg); border-radius: var(--radius-lg); padding: 0; margin-bottom: 24px; border: 1px solid var(--border); overflow: hidden; }
         .settings-item { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
         .settings-item:last-child { border-bottom: none; }
-        .settings-item-row { display: flex; justify-content: space-between; align-items: center; flex-direction: row; }
-
-        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        input:checked + .slider { background-color: var(--success); }
-        input:checked + .slider:before { transform: translateX(22px); }
 
         .creator-note { font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 40px; font-weight: 500; }
         .creator-note strong { color: var(--primary); font-weight: 800; }
@@ -168,20 +185,6 @@
 
     <nav class="app-bar">
         <h1 class="app-title">Zeiten<span>.</span></h1>
-        <div class="app-actions">
-            <button class="nav-icon" onclick="openOverview()" title="Berichte">
-                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect></svg>
-            </button>
-            <button class="nav-icon" onclick="openSettings()" title="Einstellungen">
-                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            </button>
-            <button class="nav-icon" onclick="generatePDF(true)" title="Teilen">
-                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
-            </button>
-            <button class="nav-icon accent" onclick="generatePDF(false)" title="Download">
-                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            </button>
-        </div>
     </nav>
 
     <div class="container">
@@ -224,7 +227,7 @@
 
                 <!-- Bereich: Aktions-Buttons (50/50 Grid für Lock & Bereitschaft) -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <button id="mainLockBtn" onclick="toggleSubmittedAction()" class="nav-icon" style="width: 100%; height: 52px; border-radius: 16px; border: none; box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);" title="Woche sperren/entsperren">
+                    <button id="mainLockBtn" onclick="toggleSubmittedAction()" class="nav-icon" style="width: 100%; height: 52px; border-radius: 16px; border: none; box-shadow: none;" title="Woche sperren/entsperren">
                         <!-- Icon wird per JavaScript eingefügt -->
                     </button>
                     <button class="nav-icon" onclick="toggleWeekCollapse()" style="width: 100%; height: 52px; border-radius: 16px; font-size: 15px; font-weight: 800; background: var(--pill-bg); border: 1px solid transparent; box-shadow: none; display: flex; justify-content: center; align-items: center; gap: 8px;" title="Bereitschaft einblenden">
@@ -256,6 +259,22 @@
         </button>
     </div>
 
+    <!-- NEUE BOTTOM NAVIGATION (DOCK) -->
+    <div class="bottom-nav">
+        <button class="nav-icon" onclick="openOverview()" title="Berichte">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect></svg>
+        </button>
+        <button class="nav-icon" onclick="openSettings()" title="Einstellungen">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        </button>
+        <button class="nav-icon" onclick="generatePDF(true)" title="Teilen">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+        </button>
+        <button class="nav-icon accent" onclick="generatePDF(false)" title="Download">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        </button>
+    </div>
+
     <!-- EINSTELLUNGEN MODAL -->
     <div id="settingsModal" class="modal">
         <div class="sheet-content">
@@ -270,13 +289,6 @@
                 <div class="settings-item">
                     <label class="bento-label">Dein Name (Für PDF)</label>
                     <input type="text" id="userName" class="bento-input" placeholder="Vorname Nachname" style="border-color:transparent; background:var(--bg-color);">
-                </div>
-                <div class="settings-item settings-item-row">
-                    <span style="font-weight:800; font-size:16px;">Dunkelmodus</span>
-                    <label class="switch">
-                        <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
-                        <span class="slider"></span>
-                    </label>
                 </div>
             </div>
 
@@ -294,11 +306,11 @@
                 Einstellungen speichern
             </button>
 
-            <div class="settings-group" style="margin-top:36px; border-color:var(--danger-bg);">
+            <div class="settings-group" style="margin-top:36px; border-color:rgba(244, 63, 94, 0.3);">
                 <div class="settings-item" style="background:var(--danger-bg);">
                     <label class="bento-label" style="color:var(--danger);">Gefahrenzone</label>
                     <p style="font-size: 14px; color: var(--danger); margin: 0 0 14px 0; opacity:0.8; font-weight:500;">Entfernt alle gespeicherten Zeiten permanent.</p>
-                    <button class="btn-danger" onclick="resetAllData()" style="background:#f43f5e; color:white; border-radius: 12px;">
+                    <button class="btn-danger" onclick="resetAllData()" style="background:#f43f5e; color:white; border-radius: 12px; border:none;">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
                         Daten löschen
                     </button>
@@ -326,7 +338,7 @@
         const dayNames = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
         const monthNamesList = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
         
-        let appState = { mondayDate: null, dayIndex: 0, name: '', entries: {}, submittedWeeks: {}, weeklyBereitschaft: {}, theme: 'dark', recentProjects: [], logoData: '' };
+        let appState = { mondayDate: null, dayIndex: 0, name: '', entries: {}, submittedWeeks: {}, weeklyBereitschaft: {}, recentProjects: [], logoData: '' };
 
         // --- Core Date & Period Logic ---
         function getMonday(d) {
@@ -418,7 +430,6 @@
             let today = new Date();
             appState.dayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1;
             loadFromStorage();
-            applyTheme();
             updateProjectSuggestions();
             renderApp();
             document.getElementById('entryList').addEventListener('input', () => { saveCurrentDay(); updateTotals(); });
@@ -426,15 +437,6 @@
                 if (event.target == document.getElementById('overviewModal')) closeOverview();
                 if (event.target == document.getElementById('settingsModal')) closeSettings();
             }
-        }
-
-        function applyTheme() {
-            document.documentElement.setAttribute('data-theme', appState.theme);
-            document.getElementById('themeToggle').checked = (appState.theme === 'dark');
-        }
-        function toggleTheme() {
-            appState.theme = document.getElementById('themeToggle').checked ? 'dark' : 'light';
-            applyTheme(); saveToStorage();
         }
 
         function renderApp() {
@@ -453,7 +455,7 @@
             document.getElementById('prevDayBtn').disabled = (appState.dayIndex === period.validIndices[0]);
             document.getElementById('nextDayBtn').disabled = (appState.dayIndex === period.validIndices[period.validIndices.length - 1]);
             
-            // Icon only Lock Button Handling mit edlem Dunkelblau
+            // Icon only Lock Button Handling mit modernem Dunkel-Look
             const lockBtn = document.getElementById('mainLockBtn');
             const addBtn = document.getElementById('addEntryBtn');
             const entriesWrapper = document.getElementById('entriesWrapper');
@@ -462,13 +464,13 @@
             
             if (isLocked) {
                 lockBtn.innerHTML = `<svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
-                lockBtn.style.background = 'var(--dark-blue)';
+                lockBtn.style.background = 'var(--primary-gradient)';
                 lockBtn.style.color = '#ffffff';
                 entriesWrapper.classList.add('locked-dimmed');
             } else {
                 lockBtn.innerHTML = `<svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
-                lockBtn.style.background = 'var(--dark-blue)';
-                lockBtn.style.color = '#ffffff';
+                lockBtn.style.background = 'var(--pill-bg)';
+                lockBtn.style.color = 'var(--text-main)';
                 entriesWrapper.classList.remove('locked-dimmed');
             }
 
@@ -498,7 +500,7 @@
 
         function handleUrlaub(cb) {
             if (cb.checked) {
-                // Bugfix applied here: cb.closest
+                // BUGFIX: cb.closest() verwenden
                 const card = cb.closest('.entry-card');
                 const stundenInput = card.querySelector('.in-stunden');
                 const baustelleInput = card.querySelector('.in-baustelle');
@@ -564,8 +566,6 @@
         
         function openSettings() { 
             document.getElementById('settingsModal').style.display = 'block'; 
-            // Kleiner Timeout für weichere Transition falls gewünscht, ansonsten direkt:
-            document.getElementById('settingsModal').style.opacity = "1";
             if(appState.logoData) {
                 document.getElementById('logoPreview').src = appState.logoData;
                 document.getElementById('logoPreview').style.display = 'block';
@@ -585,7 +585,7 @@
             saveCurrentDay();
             const list = document.getElementById('overviewList');
             list.innerHTML = '';
-            list.style.display = 'block'; // Block-Layout für die Monate
+            list.style.display = 'block'; 
 
             let periodsMap = new Map();
             
@@ -613,7 +613,6 @@
                 entries.forEach(e => periodsMap.get(pKey).hours += parseFloat(e.stunden) || 0);
             }
             
-            // Sortieren nach Datum absteigend
             let sortedPeriods = Array.from(periodsMap.values()).sort((a,b)=>b.start-a.start);
             
             let currentMonthKey = '';
@@ -624,13 +623,12 @@
                 let year = p.start.getFullYear();
                 let monthKey = `${monthNamesList[month]} ${year}`;
 
-                // Neuen Monat erkennen und Überschrift/Grid erstellen
                 if (monthKey !== currentMonthKey) {
                     currentMonthKey = monthKey;
 
                     let monthHeader = document.createElement('div');
                     monthHeader.innerHTML = monthKey;
-                    monthHeader.style = "font-size: 18px; font-weight: 900; color: var(--text-main); margin: 32px 0 16px 0; border-bottom: 2px solid var(--border); padding-bottom: 8px; letter-spacing:-0.5px;";
+                    monthHeader.style = "font-size: 18px; font-weight: 900; color: var(--text-main); margin: 32px 0 16px 0; border-bottom: 1px solid var(--border); padding-bottom: 8px; letter-spacing:-0.5px;";
                     list.appendChild(monthHeader);
 
                     currentGrid = document.createElement('div');
@@ -638,10 +636,9 @@
                     list.appendChild(currentGrid);
                 }
 
-                // Wochen-Eintrag im aktuellen Monats-Grid
                 let div = document.createElement('div');
-                div.style = "padding:16px 8px; background:var(--card-bg); border:1px solid var(--border); border-radius:16px; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer; text-align:center; transition:0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.02);";
-                div.onmouseover = function() { this.style.transform = "translateY(-2px)"; this.style.borderColor = "var(--primary-light)"; }
+                div.style = "padding:16px 8px; background:var(--card-bg); border:1px solid var(--border); border-radius:16px; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer; text-align:center; transition:0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.2);";
+                div.onmouseover = function() { this.style.transform = "translateY(-2px)"; this.style.borderColor = "var(--primary)"; }
                 div.onmouseout = function() { this.style.transform = "none"; this.style.borderColor = "var(--border)"; }
                 
                 let lockBadge = p.locked 
@@ -671,7 +668,6 @@
                 let b = card.querySelector('.in-baustelle').value;
                 let bTrimmed = b.trim();
                 
-                // Projekt für Autocomplete speichern (außer Urlaub/Leer)
                 if (bTrimmed && bTrimmed !== 'Urlaub' && !projects.includes(bTrimmed)) {
                     projects.unshift(bTrimmed);
                 }
@@ -684,7 +680,6 @@
                 });
             });
 
-            // Behalte nur die letzten 10 Projekte im Gedächtnis
             appState.recentProjects = projects.slice(0, 10);
             appState.entries[getDateString(getDateForIndex(appState.dayIndex))] = entries;
             
@@ -714,7 +709,6 @@
                 appState.entries = p.entries || {};
                 appState.submittedWeeks = p.submittedWeeks || {};
                 appState.weeklyBereitschaft = p.weeklyBereitschaft || {};
-                appState.theme = p.theme || 'dark';
                 appState.recentProjects = p.recentProjects || [];
                 appState.logoData = p.logoData || '';
             }
@@ -737,6 +731,7 @@
             let safeName = appState.name ? appState.name.replace(/\s+/g, '_') : 'Mitarbeiter';
             let fileName = `Arbeitsnachweis_KW${kw}_${formatDateVeryShort(period.periodStart).replace('.','')}_${safeName}.pdf`;
 
+            // PDF bleibt HELL für den professionellen Druck!
             let html = `
             <div style="font-family: 'Outfit', sans-serif; padding: 50px; color: #0f172a; background: #ffffff; min-height: 280mm; display: flex; flex-direction: column;">
                 
