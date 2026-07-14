@@ -1,4 +1,4 @@
-const CACHE_NAME = 'protocolapp-cache-v3';
+const CACHE_NAME = 'protocolapp-cache-v3h';
 
 // Alle Dateien, die für den echten Offline-Modus geladen werden müssen
 const ASSETS_TO_CACHE = [
