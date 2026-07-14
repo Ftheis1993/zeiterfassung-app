@@ -1,4 +1,4 @@
-const CACHE_NAME = 'protocolavhhhpp-cache-vuu';
+const CACHE_NAME = 'protocolavhhhpp-caddddche-vuu';
 
 // Alle Dateien, die für den echten Offline-Modus geladen werden müssen
 const ASSETS_TO_CACHE = [
