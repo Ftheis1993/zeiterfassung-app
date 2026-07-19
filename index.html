@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Stundenzettel</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#18181b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Stundenzettel">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0ea5e9;       
+            --primary-hover: #38bdf8;
+            --primary-gradient: linear-gradient(135deg, #0ea5e9, #3b82f6);
+            --primary-light: rgba(14, 165, 233, 0.15);
+            
+            --bg-color: #18181b;      
+            --card-bg: rgba(39, 39, 42, 0.5);       
+            --card-elevated: rgba(63, 63, 70, 0.7);
+            --text-main: #f4f4f5;     
+            --text-muted: #a1a1aa;    
+            --border: rgba(255, 255, 255, 0.08);        
+            --border-highlight: rgba(14, 165, 233, 0.3);
+            
+            --danger: #f43f5e;
+            --danger-bg: rgba(244, 63, 94, 0.15);
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.15);
+            --dark-blue: #1e3a8a;
+            
+            --input-bg: rgba(9, 9, 11, 0.6);
+            --pill-bg: rgba(255, 255, 255, 0.06);
+            --glass-bg: rgba(24, 24, 27, 0.85);
+            --modal-overlay: rgba(9, 9, 11, 0.85);
+            
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-pill: 100px;
+            
+            --shadow-glow: 0 0 24px -6px rgba(14, 165, 233, 0.4);
+            --shadow-card: 0 16px 30px -10px rgba(0, 0, 0, 0.5);
+            --transition-smooth: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            margin: 0; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            padding-bottom: 200px; 
+            /* WICHTIG: user-select: none hier entfernt, sonst blockiert iOS die Tastatur */
+        }
+
+        /* --- iOS Fix für Tastatur-Eingaben --- */
+        input {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        /* Verhindert Textmarkierung NUR bei Buttons & Menüs */
+        .nav-icon, .btn-action, .action-pill, .pill-text, .fab, .app-title, .bento-label, .stats-pill {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .app-bar { 
+            position: sticky; top: 0; z-index: 40; 
+            background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); 
+            padding: max(16px, env(safe-area-inset-top)) 20px 16px 20px; 
+            display: flex; justify-content: center; align-items: center; 
+            border-bottom: 1px solid var(--border); 
+        }
+        .app-title { font-size: 22px; font-weight: 900; margin: 0; letter-spacing: -1px; color: var(--text-main); }
+        .app-title span { color: var(--primary); text-shadow: 0 0 16px rgba(14, 165, 233, 0.5); }
+
+        .nav-icon { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); width: 40px; height: 40px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition-smooth); flex-shrink: 0; padding: 0; backdrop-filter: blur(10px); }
+        .nav-icon:hover { background: var(--card-elevated); border-color: var(--border-highlight); transform: scale(1.05); }
+        .nav-icon:active { transform: scale(0.95); }
+        .nav-icon:disabled { opacity: 0.2; cursor: default; transform: none; }
+        
+        .nav-icon-sm { width: 32px; height: 32px; border-radius: 10px; }
+        .nav-icon-sm svg { width: 14px; height: 14px; }
+
+        .container { max-width: 640px; margin: 0 auto; padding: 20px 14px; }
+
+        .bento-card { background: var(--card-bg); border-radius: var(--radius-xl); padding: 20px 16px; box-shadow: var(--shadow-card); border: 1px solid var(--border); position: relative; overflow: hidden; animation: fadeUp 0.5s ease-out forwards; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transform: translateZ(0); }
+        
+        .bento-label { font-size: 10px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .bento-label::before { content: ''; display: block; width: 6px; height: 6px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 8px var(--primary); }
+
+        .card-header-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; margin-bottom: 16px; }
+        .card-info-clickable { flex-grow: 1; text-align: center; }
+        
+        #weekTitleDisplay { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
+        #dayTitleDisplay { font-size: 18px; font-weight: 900; color: var(--text-main); line-height: 1.2; letter-spacing: -1px; margin: 4px 0 0 0; text-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
+        .collapsible-content { max-height: 800px; opacity: 1; transition: var(--transition-smooth); margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
+        .collapsible-content.collapsed { max-height: 0; opacity: 0; margin-top: 0; padding-top: 0; border-top: none; pointer-events: none; }
+
+        .bento-input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 14px; background-color: var(--input-bg); color: var(--text-main); font-family: inherit; font-weight: 600; transition: var(--transition-smooth); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+        .bento-input::placeholder { color: var(--text-muted); }
+        .bento-input:focus { outline: none; border-color: var(--primary); background: rgba(14, 165, 233, 0.05); box-shadow: 0 0 0 2px var(--primary-light), inset 0 2px 4px rgba(0,0,0,0.2); }
+
+        .in-stunden { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 20px; font-weight: 900; text-align: center; color: var(--primary); background: var(--input-bg); font-family: inherit; transition: var(--transition-smooth); text-shadow: 0 0 12px rgba(14,165,233,0.3); }
+        .in-stunden:focus { outline: none; border-color: var(--primary); transform: scale(1.02); }
+
+        .entry-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 16px; border: 1px solid var(--border); transition: var(--transition-smooth); animation: fadeUp 0.4s ease-out forwards; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transform: translateZ(0); }
+        .entry-card:focus-within { border-color: var(--border-highlight); box-shadow: 0 8px 30px rgba(0,0,0,0.3); background: var(--card-elevated); }
+        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+        .time-row { display: grid; grid-template-columns: 1fr 44px; gap: 10px; align-items: center; margin-bottom: 16px; }
+        
+        .time-row .nav-icon { width: 100%; height: 100%; border-radius: 10px; }
+        .time-row .nav-icon svg { width: 20px; height: 20px; }
+
+        .locked-dimmed { opacity: 0.5; filter: grayscale(0.8); pointer-events: none; }
+        .locked-dimmed .entry-card { border: 1px dashed var(--border); background: transparent; box-shadow: none; }
+
+        .action-pill { display: flex; justify-content: center; align-items: center; gap: 6px; height: 38px; background: var(--pill-bg); color: var(--text-muted); border-radius: var(--radius-pill); font-size: 9px; font-weight: 800; border: 1px solid var(--border); transition: var(--transition-smooth); text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; padding: 0 12px; }
+        .action-pill:active { transform: scale(0.95); }
+        .action-pill.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); box-shadow: 0 0 15px rgba(14, 165, 233, 0.2); }
+        
+        .action-pill.icon-only { width: 38px; padding: 0; flex-shrink: 0; }
+
+        .top-stats-pill { flex: 1.2; display: flex; justify-content: center; align-items: center; height: 38px; background: var(--input-bg); border-radius: var(--radius-pill); border: 1px solid var(--border); font-size: 10px; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+        .top-stats-pill span { color: var(--primary); font-weight: 900; margin: 0 4px 0 2px; }
+
+        .pill-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .pill-label { cursor: pointer; }
+        .pill-label input { display: none; }
+        .pill-text { display: flex; justify-content: center; align-items: center; height: 38px; background: var(--pill-bg); color: var(--text-muted); border-radius: var(--radius-pill); font-size: 9px; font-weight: 800; border: 1px solid var(--border); transition: var(--transition-smooth); text-transform: uppercase; letter-spacing: 0.5px; }
+        .pill-label input:checked + .pill-text { background: var(--primary-light); color: var(--primary); border-color: var(--primary); box-shadow: 0 0 15px rgba(14, 165, 233, 0.2); }
+
+        .btn-action { width: 100%; height: 44px; border-radius: var(--radius-md); font-size: 14px; font-weight: 800; cursor: pointer; transition: var(--transition-smooth); display: flex; justify-content: center; align-items: center; gap: 8px; border: none; }
+        .btn-primary { background: var(--primary-gradient); color: #ffffff; box-shadow: var(--shadow-glow); }
+        .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(244, 63, 94, 0.3); }
+
+        .entries-header { text-align: center; font-weight: 900; font-size: 18px; margin-top: 40px; margin-bottom: 16px; letter-spacing: -0.5px; }
+
+        .bottom-nav { position: fixed; bottom: max(24px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; background: rgba(39, 39, 42, 0.85); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); padding: 6px; border-radius: var(--radius-pill); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 50px -10px rgba(0,0,0,0.8); z-index: 90; }
+        .bottom-nav .nav-icon { width: 44px; height: 44px; background: transparent; border: none; color: var(--text-muted); border-radius: 50%; box-shadow: none; }
+        .bottom-nav .nav-icon svg { width: 20px; height: 20px; }
+        .bottom-nav .nav-icon:hover { color: var(--text-main); background: var(--pill-bg); }
+        .bottom-nav .nav-icon.accent { background: var(--primary-gradient); color: #ffffff; box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3); }
+        
+        .fab-container { position: fixed; bottom: max(100px, env(safe-area-inset-bottom) + 70px); right: 16px; z-index: 40; }
+        .fab { width: 56px; height: 56px; border-radius: 18px; background: var(--primary-gradient); color: #ffffff; border: none; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-glow); cursor: pointer; transition: var(--transition-smooth); }
+        .fab svg { width: 24px; height: 24px; }
+        .fab:hover { transform: translateY(-4px) scale(1.05); }
+
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: var(--modal-overlay); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: fadeUp 0.3s ease-out; }
+        .sheet-content { background-color: var(--bg-color); position: absolute; bottom: 0; left: 0; width: 100%; border-radius: 32px 32px 0 0; padding: 32px 20px max(40px, env(safe-area-inset-bottom)); max-height: 90vh; overflow-y: auto; border-top: 1px solid var(--border); box-shadow: 0 -20px 60px rgba(0,0,0,0.5); }
+        .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .sheet-header h2 { font-size: 24px; }
+        
+        .settings-group { background: var(--card-bg); border-radius: var(--radius-lg); margin-bottom: 20px; border: 1px solid var(--border); overflow: hidden; backdrop-filter: blur(10px); }
+        .settings-item { padding: 16px; border-bottom: 1px solid var(--border); }
+        .settings-item:last-child { border-bottom: none; }
+
+        .creator-note { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 32px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .creator-note strong { color: var(--primary); }
+
+    </style>
+</head>
+<body>
+
+    <datalist id="recent-projects"></datalist>
+
+    <nav class="app-bar">
+        <h1 class="app-title">Stundenzettel<span>.</span></h1>
+    </nav>
+
+    <div class="container">
+        
+        <div class="bento-grid">
+            
+            <div class="bento-card" id="unifiedControlCard">
+                <div class="card-header-nav">
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <button class="nav-icon nav-icon-sm" onclick="changeWeek(-1)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19l-7-7 7-7M18 19l-7-7 7-7"></path></svg></button>
+                        <button class="nav-icon nav-icon-sm" id="prevDayBtn" onclick="changeDay(-1)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"></path></svg></button>
+                    </div>
+
+                    <div class="card-info-clickable">
+                        <div id="weekTitleDisplay">KW --</div>
+                        <div id="dayTitleDisplay">Montag, 01.01.</div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <button class="nav-icon nav-icon-sm" onclick="changeWeek(1)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5l7 7-7 7M6 5l7 7-7 7"></path></svg></button>
+                        <button class="nav-icon nav-icon-sm" id="nextDayBtn" onclick="changeDay(1)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg></button>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 6px; align-items: stretch; width: 100%;">
+                    
+                    <div class="top-stats-pill">
+                        T: <span id="dailyTotal">0.00</span> h <span style="margin: 0 2px; opacity: 0.4;">|</span> W: <span id="weekTotalBadge">0.00</span> h
+                    </div>
+
+                    <button id="mainLockBtn" onclick="toggleSubmittedAction()" class="action-pill icon-only"></button>
+                    
+                    <button id="bereitschaftBtn" class="action-pill" style="flex: 1; padding: 0 4px;" onclick="toggleWeekCollapse()">
+                        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" style="width:12px; height:12px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        Bereitschaft
+                    </button>
+                    
+                </div>
+
+                <div class="collapsible-content collapsed" id="weekContent">
+                    <div class="bento-label">Bereitschaftsdienst</div>
+                    <input type="text" id="in-bereitschaft" class="bento-input" placeholder="z.B. Mo-Fr 16:00-08:00" oninput="saveBereitschaft()">
+                </div>
+            </div>
+            
+        </div>
+
+        <h2 class="entries-header">Baustelle / Projekt</h2>
+        
+        <div id="entriesWrapper">
+            <div id="entryList"></div>
+        </div>
+
+    </div>
+
+    <div class="fab-container">
+        <button class="fab" id="addEntryBtn" onclick="addEmptyCard()">
+            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16m8-8H4"></path></svg>
+        </button>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-icon" onclick="openOverview()"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect></svg></button>
+        <button class="nav-icon" onclick="openSettings()"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+        <button class="nav-icon" onclick="generatePDF(true)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg></button>
+        <button class="nav-icon accent" onclick="generatePDF(false)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button>
+    </div>
+
+    <!-- EINSTELLUNGEN MODAL -->
+    <div id="settingsModal" class="modal">
+        <div class="sheet-content">
+            <div class="sheet-header">
+                <h2 style="margin:0; font-weight:900; letter-spacing: -1px;">Einstellungen</h2>
+                <button class="nav-icon" onclick="closeSettings()"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+            </div>
+            
+            <div class="settings-group">
+                <div class="settings-item">
+                    <label class="bento-label">Dein Name (Für PDF)</label>
+                    <input type="text" id="userName" class="bento-input" placeholder="Name eintragen..." style="background: transparent; border-color: transparent; padding: 4px 0;">
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-item">
+                    <label class="bento-label">Firmenlogo (Für PDF)</label>
+                    <input type="file" id="logoInput" accept="image/png, image/jpeg, image/jpg" class="bento-input" style="padding: 8px 0; font-size: 13px; background: transparent; border-color: transparent;">
+                    <img id="logoPreview" src="" style="max-height: 50px; margin-top: 12px; display: none; object-fit: contain; border-radius: 10px;">
+                    <button class="btn-action btn-danger" id="removeLogoBtn" style="margin-top: 12px; display: none;" onclick="removeLogo()">Logo entfernen</button>
+                </div>
+            </div>
+            
+            <button class="btn-action btn-primary" onclick="saveSettings()">
+                Einstellungen speichern
+            </button>
+
+            <div class="settings-group" style="margin-top:32px; border-color:rgba(244, 63, 94, 0.3);">
+                <div class="settings-item" style="background:var(--danger-bg);">
+                    <label class="bento-label" style="color:var(--danger);">Gefahrenzone</label>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 12px 0; line-height: 1.4;">Entfernt alle lokal gespeicherten Zeiten permanent von diesem Gerät.</p>
+                    <button class="btn-action" onclick="resetAllData()" style="background:var(--danger); color:white; border: none;">
+                        Daten löschen
+                    </button>
+                </div>
+            </div>
+            <p class="creator-note">Erstellt von <strong>F.Theis</strong></p>
+        </div>
+    </div>
+
+    <!-- BERICHTE MODAL -->
+    <div id="overviewModal" class="modal">
+        <div class="sheet-content">
+            <div class="sheet-header">
+                <h2 style="margin:0; font-weight:900; letter-spacing:-1px;">Berichte</h2>
+                <button class="nav-icon" onclick="closeOverview()"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+            </div>
+            <div id="overviewList"></div>
+        </div>
+    </div>
+
+    <script>
+        const dayNames = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+        const monthNamesList = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+        
+        let appState = { mondayDate: null, dayIndex: 0, name: '', entries: {}, submittedWeeks: {}, weeklyBereitschaft: {}, recentProjects: [], logoData: '' };
+
+        function getMonday(d) {
+            let date = new Date(d); date.setHours(0,0,0,0);
+            let day = date.getDay(); let diff = date.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(date.setDate(diff));
+        }
+        function getDateForIndex(index, monday = appState.mondayDate) {
+            let d = new Date(monday); d.setDate(d.getDate() + index); return d;
+        }
+        function getDateString(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+        function formatDateShort(date) {
+            return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear()}`;
+        }
+        function formatDateVeryShort(date) {
+            return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.`;
+        }
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        }
+
+        function getCurrentPeriod() {
+            let currentDate = getDateForIndex(appState.dayIndex, appState.mondayDate);
+            let targetMonth = currentDate.getMonth();
+            let periodStart = null;
+            let periodEnd = null;
+            let validIndices = [];
+
+            for (let i = 0; i < 7; i++) {
+                let d = getDateForIndex(i, appState.mondayDate);
+                if (d.getMonth() === targetMonth) {
+                    if (!periodStart) periodStart = d;
+                    periodEnd = d;
+                    validIndices.push(i);
+                }
+            }
+            return { currentDate, targetMonth, periodStart, periodEnd, validIndices, periodKey: getDateString(periodStart) };
+        }
+
+        document.getElementById('logoInput').addEventListener('change', function(e) {
+            let file = e.target.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function(evt) {
+                    appState.logoData = evt.target.result;
+                    document.getElementById('logoPreview').src = appState.logoData;
+                    document.getElementById('logoPreview').style.display = 'block';
+                    document.getElementById('removeLogoBtn').style.display = 'flex';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function removeLogo() {
+            appState.logoData = '';
+            document.getElementById('logoPreview').src = '';
+            document.getElementById('logoPreview').style.display = 'none';
+            document.getElementById('removeLogoBtn').style.display = 'none';
+            document.getElementById('logoInput').value = '';
+        }
+
+        function updateProjectSuggestions() {
+            let dl = document.getElementById('recent-projects');
+            dl.innerHTML = '';
+            if (appState.recentProjects) {
+                appState.recentProjects.forEach(p => {
+                    let opt = document.createElement('option');
+                    opt.value = p;
+                    dl.appendChild(opt);
+                });
+            }
+        }
+
+        function toggleWeekCollapse() {
+            const content = document.getElementById('weekContent');
+            const btn = document.getElementById('bereitschaftBtn');
+            content.classList.toggle('collapsed');
+            
+            if(!content.classList.contains('collapsed')) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+
+        function initApp() {
+            document.documentElement.setAttribute('data-theme', 'dark'); 
+            appState.mondayDate = getMonday(new Date());
+            let today = new Date();
+            appState.dayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1;
+            loadFromStorage();
+            updateProjectSuggestions();
+            renderApp();
+            document.getElementById('entryList').addEventListener('input', () => { saveCurrentDay(); updateTotals(); });
+            window.onclick = function(event) {
+                if (event.target == document.getElementById('overviewModal')) closeOverview();
+                if (event.target == document.getElementById('settingsModal')) closeSettings();
+            }
+        }
+
+        function renderApp() {
+            let period = getCurrentPeriod();
+            let pKey = period.periodKey;
+
+            document.getElementById('weekTitleDisplay').innerText = `KW ${getWeekNumber(period.currentDate)}`;
+            document.getElementById('userName').value = appState.name;
+            document.getElementById('in-bereitschaft').value = appState.weeklyBereitschaft[pKey] || '';
+            
+            let isLocked = !!appState.submittedWeeks[pKey];
+            document.getElementById('in-bereitschaft').disabled = isLocked;
+            
+            document.getElementById('dayTitleDisplay').innerText = `${dayNames[appState.dayIndex]}, ${formatDateVeryShort(period.currentDate)}`;
+            
+            document.getElementById('prevDayBtn').disabled = (appState.dayIndex === period.validIndices[0]);
+            document.getElementById('nextDayBtn').disabled = (appState.dayIndex === period.validIndices[period.validIndices.length - 1]);
+            
+            const lockBtn = document.getElementById('mainLockBtn');
+            const addBtn = document.getElementById('addEntryBtn');
+            const entriesWrapper = document.getElementById('entriesWrapper');
+
+            addBtn.style.display = isLocked ? 'none' : 'flex';
+            
+            if (isLocked) {
+                lockBtn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
+                lockBtn.className = 'action-pill icon-only active';
+                entriesWrapper.classList.add('locked-dimmed');
+            } else {
+                lockBtn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
+                lockBtn.className = 'action-pill icon-only';
+                entriesWrapper.classList.remove('locked-dimmed');
+            }
+            
+            if(document.getElementById('in-bereitschaft').value !== '') {
+                document.getElementById('bereitschaftBtn').classList.add('active');
+            } else {
+                document.getElementById('bereitschaftBtn').classList.remove('active');
+            }
+
+            let dateStr = getDateString(period.currentDate);
+            let dayData = appState.entries[dateStr] || [];
+            const list = document.getElementById('entryList');
+            list.innerHTML = ''; 
+            if (dayData.length === 0) addEmptyCard(isLocked); 
+            else dayData.forEach(entry => addCardToDOM(entry.baustelle, entry.arbeit, entry.stunden, entry.zusatz, isLocked));
+            updateTotals();
+        }
+
+        function toggleSubmittedAction() {
+            let period = getCurrentPeriod();
+            let pKey = period.periodKey;
+            let isCurrentlyLocked = !!appState.submittedWeeks[pKey];
+            
+            if (isCurrentlyLocked) {
+                if (!confirm("Möchtest du diese Woche wieder entsperren und bearbeiten?")) return;
+                appState.submittedWeeks[pKey] = false;
+            } else {
+                appState.submittedWeeks[pKey] = true;
+            }
+            saveToStorage(); 
+            renderApp(); 
+        }
+
+        function handleUrlaub(cb) {
+            if (cb.checked) {
+                const card = cb.closest('.entry-card');
+                const stundenInput = card.querySelector('.in-stunden');
+                const baustelleInput = card.querySelector('.in-baustelle');
+                
+                if (appState.dayIndex >= 0 && appState.dayIndex <= 3) { stundenInput.value = '8'; } 
+                else if (appState.dayIndex === 4) { stundenInput.value = '6'; } 
+                else { stundenInput.value = '0'; }
+
+                if (!baustelleInput.value) baustelleInput.value = 'Urlaub';
+                
+                saveCurrentDay(); updateTotals();
+            }
+        }
+
+        function addEmptyCard(isLocked = false) { addCardToDOM('', '', '', [], isLocked); }
+
+        function addCardToDOM(baustelle, arbeit, stunden, zusatz, isLocked) {
+            const list = document.getElementById('entryList');
+            const card = document.createElement('div');
+            card.className = 'entry-card';
+            let zList = Array.isArray(zusatz) ? zusatz : [];
+            const dAttr = isLocked ? 'disabled' : '';
+            card.innerHTML = `
+                <div class="input-group">
+                    <input type="text" class="in-baustelle bento-input" placeholder="Projekt / Baustelle" value="${baustelle}" list="recent-projects" ${dAttr}>
+                    <input type="text" class="in-arbeit bento-input" placeholder="Ausgeführte Tätigkeiten" value="${arbeit}" ${dAttr}>
+                </div>
+                <div class="time-row">
+                    <input type="number" step="0.25" class="in-stunden" placeholder="0.00" value="${stunden}" ${dAttr}>
+                    <button class="nav-icon" style="color:var(--danger); background:var(--danger-bg); border:none;" onclick="deleteCard(this)" ${dAttr}>
+                        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+                <div class="pill-container">
+                    <label class="pill-label"><input type="checkbox" value="Auslöse" class="in-zusatz" ${zList.includes('Auslöse')?'checked':''} ${dAttr}><span class="pill-text">Auslöse</span></label>
+                    <label class="pill-label"><input type="checkbox" value="Übernacht." class="in-zusatz" ${zList.includes('Übernacht.')?'checked':''} ${dAttr}><span class="pill-text">Übernacht.</span></label>
+                    <label class="pill-label"><input type="checkbox" value="Notdienst" class="in-zusatz" ${zList.includes('Notdienst')?'checked':''} ${dAttr}><span class="pill-text">Notdienst</span></label>
+                    <label class="pill-label"><input type="checkbox" value="Urlaub" class="in-zusatz" onchange="handleUrlaub(this)" ${zList.includes('Urlaub')?'checked':''} ${dAttr}><span class="pill-text">Urlaub</span></label>
+                </div>
+            `;
+            list.appendChild(card);
+        }
+
+        function deleteCard(btn) { btn.closest('.entry-card').remove(); saveCurrentDay(); updateTotals(); if(document.getElementById('entryList').children.length === 0) addEmptyCard(); }
+        
+        function saveBereitschaft() { 
+            let period = getCurrentPeriod();
+            appState.weeklyBereitschaft[period.periodKey] = document.getElementById('in-bereitschaft').value; 
+            saveToStorage(); 
+        }
+        
+        function changeDay(delta) { saveCurrentDay(); appState.dayIndex += delta; renderApp(); }
+        function changeWeek(delta) { 
+            saveCurrentDay(); 
+            let period = getCurrentPeriod();
+            let newDate = delta === 1 ? new Date(period.periodEnd) : new Date(period.periodStart);
+            newDate.setDate(newDate.getDate() + (delta === 1 ? 1 : -1));
+            appState.mondayDate = getMonday(newDate);
+            let day = newDate.getDay();
+            appState.dayIndex = day === 0 ? 6 : day - 1;
+            renderApp(); 
+        }
+        
+        function openSettings() { 
+            document.getElementById('settingsModal').style.display = 'block'; 
+            if(appState.logoData) {
+                document.getElementById('logoPreview').src = appState.logoData;
+                document.getElementById('logoPreview').style.display = 'block';
+                document.getElementById('removeLogoBtn').style.display = 'flex';
+            }
+        }
+        function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+        
+        function saveSettings() {
+            appState.name = document.getElementById('userName').value;
+            saveToStorage();
+            closeSettings();
+            renderApp();
+        }
+
+        function openOverview() {
+            saveCurrentDay();
+            const list = document.getElementById('overviewList');
+            list.innerHTML = '';
+            list.style.display = 'block'; 
+
+            let periodsMap = new Map();
+            
+            for (const [dateStr, entries] of Object.entries(appState.entries)) {
+                let d = new Date(dateStr);
+                let monday = getMonday(d);
+                let targetMonth = d.getMonth();
+                
+                let pStart = null;
+                let pEnd = null;
+                for (let i = 0; i < 7; i++) {
+                    let iterD = new Date(monday);
+                    iterD.setDate(iterD.getDate() + i);
+                    if (iterD.getMonth() === targetMonth) {
+                        if (!pStart) pStart = new Date(iterD);
+                        pEnd = new Date(iterD);
+                    }
+                }
+                
+                let pKey = getDateString(pStart);
+                
+                if (!periodsMap.has(pKey)) {
+                    periodsMap.set(pKey, { start: pStart, end: pEnd, hours: 0, locked: !!appState.submittedWeeks[pKey], kw: getWeekNumber(pStart) });
+                }
+                entries.forEach(e => periodsMap.get(pKey).hours += parseFloat(e.stunden) || 0);
+            }
+            
+            let sortedPeriods = Array.from(periodsMap.values()).sort((a,b)=>b.start-a.start);
+            
+            let monthlyTotals = {};
+            sortedPeriods.forEach(p => {
+                let month = p.start.getMonth();
+                let year = p.start.getFullYear();
+                let monthKey = `${monthNamesList[month]} ${year}`;
+                if(!monthlyTotals[monthKey]) monthlyTotals[monthKey] = 0;
+                monthlyTotals[monthKey] += p.hours;
+            });
+            
+            let currentMonthKey = '';
+            let currentGrid = null;
+
+            sortedPeriods.forEach(p => {
+                let month = p.start.getMonth();
+                let year = p.start.getFullYear();
+                let monthKey = `${monthNamesList[month]} ${year}`;
+
+                if (monthKey !== currentMonthKey) {
+                    currentMonthKey = monthKey;
+                    
+                    let monthHeader = document.createElement('div');
+                    monthHeader.style = "display: flex; justify-content: space-between; align-items: flex-end; margin: 24px 0 12px 0;";
+                    
+                    monthHeader.innerHTML = `
+                        <div style="font-size: 18px; font-weight: 900; color: var(--text-main); letter-spacing: -0.5px;">${monthKey}</div>
+                        <div style="font-size: 15px; font-weight: 800; color: var(--primary);">${monthlyTotals[monthKey].toFixed(2)} h</div>
+                    `;
+                    list.appendChild(monthHeader);
+
+                    currentGrid = document.createElement('div');
+                    currentGrid.style = "display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;";
+                    list.appendChild(currentGrid);
+                }
+
+                let div = document.createElement('div');
+                div.style = "padding:12px 6px; background:var(--input-bg); border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer; transition:var(--transition-smooth);";
+                div.onmouseover = function() { this.style.transform = "scale(1.05)"; this.style.borderColor = "var(--border-highlight)"; this.style.background = "var(--card-elevated)"; }
+                div.onmouseout = function() { this.style.transform = "none"; this.style.borderColor = "var(--border)"; this.style.background = "var(--input-bg)"; }
+                
+                let lockBadge = p.locked 
+                    ? `<div style="color:var(--primary); margin-top:6px;"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>` 
+                    : `<div style="color:var(--text-muted); margin-top:6px; opacity: 0.5;"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></div>`;
+
+                div.innerHTML = `<div style="font-weight:800; font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">KW ${p.kw}</div>
+                                 <div style="font-weight:900; color:var(--text-main); font-size:16px; margin-top:4px;">${p.hours.toFixed(1)}</div>
+                                 ${lockBadge}`;
+                div.onclick = () => { 
+                    appState.mondayDate = getMonday(p.start); 
+                    let day = p.start.getDay();
+                    appState.dayIndex = day === 0 ? 6 : day - 1;
+                    renderApp(); closeOverview(); 
+                };
+                currentGrid.appendChild(div);
+            });
+            document.getElementById('overviewModal').style.display = 'block';
+        }
+        function closeOverview() { document.getElementById('overviewModal').style.display = 'none'; }
+
+        function saveCurrentDay() {
+            let entries = [];
+            let projects = appState.recentProjects || [];
+
+            document.querySelectorAll('.entry-card').forEach(card => {
+                let b = card.querySelector('.in-baustelle').value;
+                let bTrimmed = b.trim();
+                
+                if (bTrimmed && bTrimmed !== 'Urlaub' && !projects.includes(bTrimmed)) {
+                    projects.unshift(bTrimmed);
+                }
+
+                entries.push({
+                    baustelle: b,
+                    arbeit: card.querySelector('.in-arbeit').value,
+                    stunden: card.querySelector('.in-stunden').value,
+                    zusatz: Array.from(card.querySelectorAll('.in-zusatz:checked')).map(cb => cb.value)
+                });
+            });
+
+            appState.recentProjects = projects.slice(0, 10);
+            appState.entries[getDateString(getDateForIndex(appState.dayIndex))] = entries;
+            
+            saveToStorage();
+            updateProjectSuggestions();
+        }
+
+        function updateTotals() {
+            let dTot = 0; document.querySelectorAll('.in-stunden').forEach(i => dTot += parseFloat(i.value) || 0);
+            document.getElementById('dailyTotal').innerText = dTot.toFixed(2);
+            
+            let wTot = 0; 
+            let period = getCurrentPeriod();
+            period.validIndices.forEach(i => {
+                let data = appState.entries[getDateString(getDateForIndex(i, appState.mondayDate))] || [];
+                data.forEach(e => wTot += parseFloat(e.stunden) || 0);
+            });
+            document.getElementById('weekTotalBadge').innerText = wTot.toFixed(2);
+        }
+
+        function saveToStorage() { localStorage.setItem('wochenstunden_pro', JSON.stringify(appState)); }
+        function loadFromStorage() {
+            let saved = localStorage.getItem('wochenstunden_pro');
+            if (saved) {
+                let p = JSON.parse(saved);
+                appState.name = p.name || '';
+                appState.entries = p.entries || {};
+                appState.submittedWeeks = p.submittedWeeks || {};
+                appState.weeklyBereitschaft = p.weeklyBereitschaft || {};
+                appState.recentProjects = p.recentProjects || [];
+                appState.logoData = p.logoData || '';
+            }
+        }
+
+        function resetAllData() {
+            if (confirm("Wirklich ALLE Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden.")) {
+                localStorage.clear(); location.reload();
+            }
+        }
+
+        async function generatePDF(shouldShare = false) {
+            saveCurrentDay();
+            let period = getCurrentPeriod();
+            let total = 0, cA = 0, cU = 0, cN = 0, cUrl = 0;
+            let kw = getWeekNumber(period.currentDate);
+            let bTxt = appState.weeklyBereitschaft[period.periodKey] || '';
+            
+            let safeName = appState.name ? appState.name.replace(/\s+/g, '_') : 'Mitarbeiter';
+            let fileName = `Stundenzettel_KW${kw}_${formatDateVeryShort(period.periodStart).replace('.','')}_${safeName}.pdf`;
+
+            let html = `
+            <div style="font-family: 'Outfit', sans-serif; padding: 50px; color: #0f172a; background: #ffffff; min-height: 280mm; display: flex; flex-direction: column;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #0ea5e9; padding-bottom: 20px; margin-bottom: 30px;">
+                    <div>
+                        <h1 style="font-size: 42px; margin: 0; font-weight: 900; letter-spacing: -1px; color: #0f172a; line-height: 1;">STUNDENZETTEL</h1>
+                        <div style="font-size: 14px; font-weight: 600; color: #64748b; margin-top: 8px;">KW ${kw} &nbsp;|&nbsp; ${formatDateShort(period.periodStart)} – ${formatDateShort(period.periodEnd)}</div>
+                        <div style="font-size: 20px; font-weight: 800; color: #0ea5e9; margin-top: 4px;">${appState.name ? `Mitarbeiter: ${appState.name}` : 'Mitarbeiter: Nicht angegeben'}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        ${appState.logoData ? `<img src="${appState.logoData}" style="max-height: 60px; max-width: 250px; object-fit: contain;">` : ''}
+                    </div>
+                </div>
+
+                <div style="flex-grow: 1;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 12px 10px; text-align: left; color: #64748b; font-weight: 800; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1;">Datum</th>
+                                <th style="padding: 12px 10px; text-align: left; color: #64748b; font-weight: 800; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1;">Projekt / Ort</th>
+                                <th style="padding: 12px 10px; text-align: left; color: #64748b; font-weight: 800; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1;">Tätigkeit</th>
+                                <th style="padding: 12px 10px; text-align: center; color: #64748b; font-weight: 800; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1;">Stunden</th>
+                                <th style="padding: 12px 10px; text-align: left; color: #64748b; font-weight: 800; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1;">Zusatz</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            
+            for(let i of period.validIndices) {
+                let dayEntries = appState.entries[getDateString(getDateForIndex(i))] || [];
+                dayEntries.filter(e => parseFloat(e.stunden) > 0 || e.baustelle).forEach((e, idx) => {
+                    let s = parseFloat(e.stunden) || 0; total += s;
+                    if(e.zusatz.includes('Auslöse')) cA++; 
+                    if(e.zusatz.includes('Übernacht.')) cU++; 
+                    if(e.zusatz.includes('Notdienst')) cN++;
+                    if(e.zusatz.includes('Urlaub')) cUrl++;
+                    
+                    let extrasHtml = e.zusatz.map(z => `<span style="display: inline-block; padding: 2px 6px; background: #e0f2fe; color: #0284c7; border-radius: 4px; font-size: 9px; font-weight: 700; margin-right: 4px; margin-bottom: 2px;">${z}</span>`).join('');
+                    
+                    let dateLabel = idx === 0 ? `<div style="font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 3px;">${formatDateShort(getDateForIndex(i))}</div><div style="font-weight: 800; color: #0f172a; font-size: 13px;">${dayNames[i]}</div>` : '';
+
+                    html += `
+                            <tr>
+                                <td style="padding: 14px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top;">${dateLabel}</td>
+                                <td style="padding: 14px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; color: #0ea5e9; font-weight: 700;">${e.baustelle}</td>
+                                <td style="padding: 14px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; color: #334155; max-width: 200px;">${e.arbeit}</td>
+                                <td style="padding: 14px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; text-align: center; font-weight: 800; font-size: 14px; color: #0f172a;">${s.toFixed(2)} std</td>
+                                <td style="padding: 14px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top;">${extrasHtml}</td>
+                            </tr>`;
+                });
+            }
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 40px; display: flex; justify-content: space-between; align-items: stretch; gap: 20px;">
+                    
+                    <div style="flex: 1; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #ffffff;">
+                        <div style="background: #f8fafc; padding: 10px 15px; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #e2e8f0;">Übersicht Zusatz & Bereitschaft</div>
+                        <div style="display: flex; justify-content: space-around; align-items: center; padding: 15px 5px; flex-wrap: wrap; gap: 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 20px; font-weight: 900; color: #0f172a;">${cA}</div>
+                                <div style="font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-top: 4px;">Auslöse</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 20px; font-weight: 900; color: #0f172a;">${cU}</div>
+                                <div style="font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-top: 4px;">Übernacht.</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 20px; font-weight: 900; color: #0f172a;">${cN}</div>
+                                <div style="font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-top: 4px;">Notdienst</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 20px; font-weight: 900; color: #0f172a;">${cUrl}</div>
+                                <div style="font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-top: 4px;">Urlaub</div>
+                            </div>
+                            <div style="width: 1px; height: 30px; background: #e2e8f0; margin: 0 5px;"></div>
+                            <div style="text-align: center; max-width: 100px;">
+                                <div style="font-size: 12px; font-weight: 800; color: ${bTxt ? '#0ea5e9' : '#0f172a'}; margin-bottom: 4px; word-wrap: break-word;">${bTxt || '-'}</div>
+                                <div style="font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase;">Bereitschaft</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: #0ea5e9; color: #ffffff; border-radius: 12px; padding: 20px 30px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; min-width: 160px;">
+                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; margin-bottom: 5px;">Gesamtsumme Periode</div>
+                        <div style="font-size: 42px; font-weight: 900; line-height: 1;">${total.toFixed(2)}<span style="font-size: 20px; font-weight: 600; opacity: 0.8; margin-left: 6px;">std</span></div>
+                    </div>
+
+                </div>
+            </div>`;
+
+            const worker = html2pdf().set({ 
+                margin: 0, 
+                filename: fileName, 
+                html2canvas: { scale: 3, useCORS: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            }).from(html);
+
+            if (shouldShare && navigator.canShare && navigator.share) {
+                const pdfBlob = await worker.output('blob');
+                const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+                
+                let empName = appState.name ? appState.name : 'Kein Name angegeben';
+                let shareSubject = `Stundenzettel - ${empName} - KW ${kw} (${formatDateVeryShort(period.periodStart)} - ${formatDateVeryShort(period.periodEnd)})`;
+
+                try {
+                    await navigator.share({ 
+                        files: [file], 
+                        title: shareSubject,
+                        text: shareSubject
+                    });
+                } catch (err) {
+                    worker.save();
+                }
+            } else {
+                worker.save();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
